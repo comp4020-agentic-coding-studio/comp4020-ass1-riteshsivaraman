@@ -374,10 +374,7 @@ function wireBodies(doc: Document): void {
     const windowStart = EMITTED_NM - span * 0.2;
     const magnification = (VISIBLE_MAX_NM - VISIBLE_MIN_NM) / span;
 
-    observedLine?.setAttribute(
-      "stroke",
-      isVisible(nm) ? wavelengthToCss(nm) : BEYOND_VISIBLE,
-    );
+    observedLine?.setAttribute("fill", isVisible(nm) ? wavelengthToCss(nm) : BEYOND_VISIBLE);
 
     // How close this shift is to being visible unaided, on a log scale. A
     // linear window on the visible band cannot do this job: the four objects

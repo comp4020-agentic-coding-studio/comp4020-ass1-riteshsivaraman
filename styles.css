@@ -227,6 +227,20 @@ p {
   gap: var(--space-m);
 }
 
+/* `section__inner prose` on one element is two roles in conflict: .prose's
+   narrow max-width wins the cascade while .section__inner's `margin-inline:
+   auto` keeps applying, so the heading block ends up centred while its
+   full-width siblings stay left. Measured 688px against 384px on desktop.
+   Outside the reading sections — where a centred panel is the intent — keep
+   the container wide and constrain its children instead. */
+.section:not(.section--read) .section__inner.prose {
+  max-width: var(--wide);
+}
+
+.section:not(.section--read) .section__inner.prose > * {
+  max-width: var(--measure);
+}
+
 /* Reading passages get a raised panel rather than a light section, so the page
    never surfaces out of space to be read. */
 .section--read .prose {

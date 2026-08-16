@@ -223,6 +223,15 @@ describe("real objects", () => {
     expect(width()).toBeGreaterThan(sirius);
   });
 
+  it("colours the observed mark by the wavelength that arrives", () => {
+    const fill = () => doc.querySelector("#line-observed")!.getAttribute("fill");
+    click('[data-body="earth"]');
+    const earth = fill();
+    click('[data-body="neutron-star"]');
+    expect(fill()).not.toBe(earth);
+    expect(earth).toBeTruthy();
+  });
+
   it("states the magnification, and drops it when none is needed", () => {
     click('[data-body="earth"]');
     expect(doc.querySelector("#window-note")!.textContent).toMatch(/magnified/);

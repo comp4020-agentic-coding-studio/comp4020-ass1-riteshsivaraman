@@ -494,14 +494,19 @@
                 stroke-width="2"
                 stroke-dasharray="4 3"
               />
-              <line
+              <!-- A rect, not a line. A vertical <line> has a zero-width
+                   bounding box, and an SVG filter defaults to
+                   objectBoundingBox units, so the filter region collapsed to
+                   nothing and this mark never rendered — with every attribute
+                   on it correct. A rect has area, so both the filter and the
+                   geometry sensor have something to work with. -->
+              <rect
                 id="line-observed" data-mark
-                x1="260"
-                y1="26"
-                x2="260"
-                y2="78"
-                stroke="rgb(0 255 145)"
-                stroke-width="4"
+                x="258"
+                y="26"
+                width="4"
+                height="52"
+                fill="rgb(0 255 145)"
                 filter="url(#lineBloom)"
               />
 
