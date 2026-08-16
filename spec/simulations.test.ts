@@ -170,6 +170,34 @@ describe("the beam depicts the shift, rather than reporting it", () => {
   });
 });
 
+describe("animate toggles", () => {
+  const boxes = () => [...doc.querySelectorAll<HTMLInputElement>("[data-animate]")];
+
+  it("offers one on every simulation", () => {
+    expect(boxes()).toHaveLength(doc.querySelectorAll("[data-sim]").length);
+  });
+
+  it("points each toggle at a control that exists", () => {
+    for (const box of boxes()) {
+      expect(doc.querySelector(`#${box.dataset.animate}`)).toBeTruthy();
+    }
+  });
+
+  it("starts off, so nothing moves until it is asked to", () => {
+    for (const box of boxes()) expect(box.checked).toBe(false);
+  });
+
+  it("switches itself off when you take hold of the control", () => {
+    // A slider that pulls back against the hand is worse than no animation.
+    for (const box of boxes()) {
+      const input = doc.querySelector<HTMLInputElement>(`#${box.dataset.animate}`)!;
+      box.checked = true;
+      input.dispatchEvent(new window.Event("pointerdown", { bubbles: true }));
+      expect(box.checked).toBe(false);
+    }
+  });
+});
+
 describe("reveals degrade safely", () => {
   it("shows every section when there is no IntersectionObserver", () => {
     // jsdom has none, which is exactly the fallback path. If this inverted,

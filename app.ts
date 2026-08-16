@@ -39,6 +39,74 @@ export function init(doc: Document): void {
   wireBodies(doc);
   wireReveals(doc);
   wireParallax(doc);
+  wireAnimateToggles(doc);
+}
+
+// --- Animate toggles --------------------------------------------------------
+//
+// The self-demo plays once and then gets out of the way, which is right for a
+// first encounter and useless if you want to sit and watch. These are the
+// persistent version: a simulation you can leave running while you read it.
+//
+// Unlike the self-demo, this is explicitly asked for, so it runs regardless of
+// prefers-reduced-motion — that setting is about motion nobody requested.
+
+function wireAnimateToggles(doc: Document): void {
+  const view = doc.defaultView;
+  if (!view) return;
+
+  for (const box of doc.querySelectorAll<HTMLInputElement>("[data-animate]")) {
+    const input = doc.querySelector<HTMLInputElement>(`#${box.dataset.animate}`);
+    if (!input) continue;
+
+    const min = Number(input.min);
+    const max = Number(input.max);
+    let raf = 0;
+    let started = 0;
+
+    // User-visible state first, animation bookkeeping second. The other order
+    // meant that if cancelAnimationFrame was missing, the throw happened
+    // before the checkbox was cleared and the toggle stuck on — which is
+    // exactly what the test found, because jsdom has no rAF unless asked.
+    const stop = () => {
+      box.checked = false;
+      input.classList.remove("is-demoing");
+      started = 0;
+      if (raf) view.cancelAnimationFrame?.(raf);
+      raf = 0;
+    };
+
+    const frame = (now: number) => {
+      if (!box.checked) return;
+      if (!started) started = now;
+      // A full out-and-back every 9s, eased at the turns so it never snaps.
+      const swing = (1 - Math.cos(((now - started) / 9000) * 2 * Math.PI)) / 2;
+      input.value = String(min + (max - min) * swing);
+      input.dispatchEvent(new view.Event("input", { bubbles: true }));
+      raf = view.requestAnimationFrame(frame);
+    };
+
+    box.addEventListener("change", () => {
+      if (!box.checked) {
+        stop();
+        return;
+      }
+      if (typeof view.requestAnimationFrame !== "function") {
+        box.checked = false;
+        return;
+      }
+      input.classList.add("is-demoing");
+      raf = view.requestAnimationFrame(frame);
+    });
+
+    // Taking hold of the control turns the animation off rather than fighting
+    // it. Nothing is more annoying than a slider that pulls back.
+    for (const event of ["pointerdown", "keydown", "touchstart"]) {
+      input.addEventListener(event, () => {
+        if (box.checked) stop();
+      });
+    }
+  }
 }
 
 function prefersReducedMotion(doc: Document): boolean {

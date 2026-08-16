@@ -296,14 +296,81 @@ p {
   gap: var(--space-l);
 }
 
+/* A drawn cue rather than the word "Scroll": a line that falls, repeatedly.
+   Nothing to read, and it points where it means. */
 .scroll-cue {
   position: absolute;
   bottom: var(--space-l);
   left: 50%;
   translate: -50% 0;
+  width: 1px;
+  height: 3rem;
+  overflow: hidden;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgb(153 165 196 / 35%)
+  );
+}
+
+.scroll-cue__line {
+  position: absolute;
+  inset-inline: 0;
+  top: -60%;
+  height: 60%;
+  background: linear-gradient(to bottom, transparent, var(--accent));
+  animation: fall 2.4s var(--ease-soft) infinite;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(260%);
+    opacity: 0;
+  }
+}
+
+/* The star sits behind everything, so text over its core needs the contrast
+   pulled back. Darkest in the middle, where centred copy lands. */
+.starfield__scrim {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 65% 55% at 50% 50%,
+    rgb(5 7 15 / 62%) 0%,
+    rgb(5 7 15 / 34%) 55%,
+    transparent 100%
+  );
+}
+
+/* Animate toggles: a simulation you can watch without operating. */
+.animate {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
   font-size: var(--step-sm);
   color: var(--on-space-dim);
-  animation: drift 2.6s var(--ease-soft) infinite;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.animate__box {
+  accent-color: var(--accent);
+  width: 1.05rem;
+  height: 1.05rem;
+  cursor: pointer;
+}
+
+.animate:has(.animate__box:checked) {
+  color: var(--accent);
 }
 
 /* The dip stops well short of transparent: at 0.55 the cue failed contrast at
@@ -904,6 +971,11 @@ input[type="range"] {
    version of the moving one. Everything lands in its final state; nothing
    travels to get there.
    --------------------------------------------------------------------------- */
+
+/* Anchor links travel rather than teleport, so the reader keeps their place. */
+html {
+  scroll-behavior: smooth;
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,
