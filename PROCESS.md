@@ -1,69 +1,73 @@
 # Process overview
 
+Citations link to `comp4020-agentic-coding-studio/comp4020-ass1-riteshsivaraman`.
+
 ## What I built
 
-An interactive explainer for gravitational redshift: gravity stretches the
-wavelength of escaping light, and past a certain strength it stretches it out
-of visible light entirely. One idea, reached three ways — a slider that turns
-gravity up on an abstract star, a pair of observers at different depths in the
-same well, and the same formula run against Earth, the Sun, Sirius B and a
-neutron star. All the physics lives in DOM-free modules; the page is a thin
-wiring layer over them.
+An interactive explainer for gravitational redshift: gravity stretches escaping
+light, and past a certain strength it stretches it out of visible light
+entirely. One idea reached three ways — a slider that turns gravity up, a pair
+of observers at different depths in the same well, and the same formula run
+against Earth, the Sun, Sirius B and a neutron star. All the physics lives in
+DOM-free modules; the page is a thin wiring layer over them.
 
 ## The moments that mattered
 
-### 1. The harness was written before a single line of the page
+### 1. The harness was written before a line of the page
 
-The sensors table, the layering rule and the design constraints went into
-`CLAUDE.md` first, so they governed the build instead of being reverse-
-documented after it
+Sensors, layering rule and design constraints went into `CLAUDE.md` first, so
+they governed the build rather than being reverse-documented after it
 ([6073ba3](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-riteshsivaraman/commit/6073ba3)).
 
-The rule I'm most glad I wrote down is the one about *when* a sensor gets
-written. A DOM test that runs against built `dist/` would have been red for the
-entire build had I written it during the harness pass, forcing a choice between
-"never commit red" and having any commit trail at all — and the trail is half
-the mark. So: pure-logic sensors before the code they test, DOM sensors at the
-start of the layer that creates their DOM. `core-interaction.test.ts` was
-therefore written at
-[362dc10](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-riteshsivaraman/commit/362dc10),
-not six hours earlier.
+The rule I'm gladdest about concerns *when* a sensor is written. A DOM test
+against built `dist/` would have been red for the whole build had I written it
+during the harness pass, forcing a choice between "never commit red" and having
+any commit trail — and the trail is half the mark. So: pure-logic sensors before
+the code they test, DOM sensors at the start of the layer that creates their
+DOM. `core-interaction.test.ts` was therefore written at
+[362dc10](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-riteshsivaraman/commit/362dc10).
 
-### 2. Building the visual sensor early, and letting it overrule my eyes
+### 2. The stillness failure — the harness became the spec
 
-The plan had `pnpm check:visual` as a checkpoint tool. It didn't exist — no
-Playwright, no axe-core, nothing in `package.json`. I built it during the theme
-layer rather than up front, because layers 0 and 1 produce nothing to look at
-([c6b779e](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-riteshsivaraman/commit/c6b779e)).
+The page passed every check and was completely lifeless. Four green checkpoints
+had reported no problems. It took a human opening the live page to notice.
 
-It found three real defects across the build that I could not see: the accent
-orange failing contrast on the light sections, white-on-orange failing on the
-CTA
-([071a171](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-riteshsivaraman/commit/071a171)),
-and then a defect in *itself* — its driven screenshot caught the spectrum
-marker mid-CSS-transition and reported a position the page never settles on
-([08c9b7d](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-riteshsivaraman/commit/08c9b7d)).
-It stays advisory and out of CI: it needs a browser binary, and it can tell me
-the layout broke but never whether the design is good.
+The root cause was not a design mistake; it was that **every sensor I owned
+measured a still frame**. Screenshots are frozen instants, axe scans a static
+DOM, the jsdom tests assert values *after* an event has settled. Nothing in the
+roster could perceive motion, so the one quality nothing measured decayed to
+zero, silently. Diagnosis and rules in
+[9698457](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-riteshsivaraman/commit/9698457);
+the fix was to give `check:visual` eyes for motion — filmstrips that sweep each
+simulation and tile the frames
+([77ca492](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-riteshsivaraman/commit/77ca492)).
+It paid immediately, making a "the colour changes but you can't see it"
+complaint concrete: five frames in which the result moved from z=3.39 to 0.00
+and the only visible change was a hairline sliding right.
 
-### 3. Rationing the looking, and rebuilding the schedule around it
+### 3. Turning bug reports into a system
 
-I cut visual check-ins from per-change to one batched round per layer, then cut
-again from five checkpoints to three after noticing that layers 0 and 1 produce
-nothing visible — screenshotting them would have photographed the starter page.
-Both cuts are in
-[6073ba3](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-riteshsivaraman/commit/6073ba3).
-The same insight reordered the build itself: horizontally across the whole page
-(maths → theme → layout → content → wiring) instead of section by section, so
-the palette got decided once rather than five times
-([c6b779e...071a171](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-riteshsivaraman/compare/c6b779e...071a171)).
+Rather than fixing reported symptoms one by one, I wrote down the loop and
+followed it: measure before diagnosing, name the *class* not the instance, say
+why no sensor caught it, **add the sensor first and watch it go red**, then fix
+([edf3efa](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-riteshsivaraman/commit/edf3efa)
+→ [854739d](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-riteshsivaraman/commit/854739d)).
 
-### 4. A distinction I got wrong, then wrote into the harness
+Two sensors, written red, found what no attribute test could: a mark rendering
+at **0.0 × 143.3px** — an SVG filter on a zero-width bounding box, every
+attribute on it correct — and **16 labels under 11px** on phone, the smallest at
+5.8px. Then, where possible, I designed the class out instead of detecting it:
+simulation 3 now contains no SVG at all, so illegible-at-390px is unreachable
+([ae8972d](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-riteshsivaraman/commit/ae8972d)).
 
-I had filed "a second draggable interaction" and "reveal the formula" together
-as stretch. Asked whether there was really no room for more, I had to separate
-them: **more mechanics dilute, more visualisation of the same mechanic
-deepens.** That distinction is now a rule in `CLAUDE.md`
-([071a171](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-riteshsivaraman/commit/071a171)),
-and it's what kept three simulations coherent — abstract, relative, real —
-rather than three unrelated toys.
+### 4. Coverage you maintain by hand is a defect waiting its turn
+
+Simulation 3 went unfilmed for a whole pass because the filmstrip list was three
+lines I had to remember to update — which is why nobody noticed its main mark
+had never rendered. Coverage is now enumerated from the page itself
+([edf3efa](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-riteshsivaraman/commit/edf3efa)).
+
+**The division of labour, which held all build:** the harness found what I
+cannot perceive — contrast ratios, a 3.5×10⁻⁷ nm rounding error, a 0px mark.
+The human found what no sensor was pointed at — that the page felt dead. Neither
+found the other's bugs.
