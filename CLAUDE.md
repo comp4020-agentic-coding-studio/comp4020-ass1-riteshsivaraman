@@ -160,3 +160,110 @@ catching you out, a fact about the stack the agent keeps getting wrong --- write
 it down here. Growing this file is the work of harness engineering, and the gap
 between this boilerplate and your own version is part of what your prototype
 says about the developer you're becoming.
+
+---
+
+# This build: gravitational redshift explainer
+
+Everything below this line is mine, not the template's. It was written before
+any of the page existed, so it governs the build rather than describing it
+afterwards.
+
+## Sensors
+
+A sensor earns a place in the gated `pnpm check` roster only if it is
+**specific** (its failure names what broke), **fast**, **automatic**, and
+**trustworthy** (it fails only when something is genuinely wrong). Anything
+that doesn't clear all four stays *advisory* --- run by hand, read with
+judgement --- until it proves itself.
+
+| Sensor | Gated? | What it tells me |
+| --- | --- | --- |
+| `spec/invariants.test.ts` | gated | The template's always-on contract: lang, title, viewport, nav landmark, one `h1`, alt text. Unchanged. |
+| `spec/redshift.test.ts` | gated | The physics is right: `z = 0` at zero compactness, `λ_obs` strictly increasing in compactness, the divergence handled at the top of the slider's range. |
+| `spec/spectrum.test.ts` | gated | Wavelength→colour is right *and* defined past the visible band, which is exactly where this page's interaction ends up. |
+| `spec/core-interaction.test.ts` | gated | The graded core interaction, asserted against built `dist/`: the slider exists, is labelled, and driving it to a higher value yields a longer `data-observed-nm` and a further-right spectrum marker. |
+| `pnpm check:visual` | **advisory** | Playwright screenshots at both marking viewports (1920×1080, 390×844) plus an axe-core scan. Mechanical catch for layout and contrast breaks. Not in `pnpm check`, not in CI. |
+
+Two rules about growing this table:
+
+- **New elements bring their own sensor, in the same pass.** When a new piece
+  of behaviour lands, its test lands with it --- so a later change cannot
+  silently break something an earlier layer established.
+- **A DOM sensor is written when the DOM it asserts exists**, not before.
+  `core-interaction.test.ts` runs against `dist/`, so writing it during the
+  harness pass would hold `pnpm check` red across the whole build and force a
+  choice between "never commit red" and having any commit trail at all. It gets
+  written at the start of the interactivity layer. Pure-logic sensors have no
+  such constraint and are written first, before the code they test.
+
+`pnpm check:visual` is deliberately advisory. It tells me whether the layout
+*broke*; it cannot tell me whether the design is *good*. Those are different
+questions and only one of them is a machine's.
+
+## Backpressure: layers, and looking on purpose
+
+Build **horizontally across the whole page**, least complex to most complex ---
+math → theme → layout → static content → interactivity --- not one section
+finished at a time. Building vertically means re-deciding the palette and the
+spacing scale once per section; building horizontally decides each of those
+once, and gets the graded interaction's maths proven before anything visual
+depends on it.
+
+Within the interactivity layer, **the core slider is wired first**. It is the
+highest-risk, most-graded piece; it gets the most remaining clock.
+
+**Looking is rationed on purpose.** Screenshots are expensive context, and a
+description of a screenshot is strictly worse evidence than the user looking at
+the page. So: no screenshot-per-change. At the end of each layer that has
+produced something visible, stop, run `pnpm check:visual`, and hand over *one
+batched round* --- the dev server URL, or a single set of screenshots covering
+the whole page as it stands --- before the next layer starts. Extra screenshots
+are reserved for a genuine ambiguity that code cannot resolve.
+
+Layers 0 and 1 produce no page to look at (pure functions; CSS tokens with no
+markup consuming them), so they report as text. That leaves three checkpoints
+that are actually worth an interruption: **skeleton at both viewports**, **real
+content**, **wired interaction**.
+
+Keyboard operability is checked at every checkpoint, not once at the end: tab
+to the slider, drive it with arrow keys, confirm the readouts move.
+
+## Design preferences
+
+**Parameterise by compactness, honestly.** The slider is
+`x = 2GM/(Rc²)` --- dimensionless, radius held conceptually fixed, so one
+slider means one physical thing ("how much gravity") rather than a decorative
+colour-cycler with physics-flavoured labels. `z = 1/√(1−x) − 1`;
+`λ_obs = λ_emit × (1 + z)` with `λ_emit` fixed at 500nm.
+
+Two consequences to design *for*, not around:
+
+- `z` diverges as `x → 1`. At the slider's top (`x = 0.95`), `λ_obs ≈ 2236nm`
+  --- far outside the visible band. That is the honest answer and a good
+  lesson: the light leaves visible light entirely. So `wavelengthToColor` must
+  be defined past ~750nm (fading to deep red, then to a dim near-black), and
+  the spectrum marker clamps to the right edge with an explicit "beyond
+  visible" state rather than sliding off into nothing.
+- A linear slider in `x` bunches most of the visible change into the top of its
+  travel. Accept this as the lesson rather than linearising it away --- the
+  non-linearity *is* the physics.
+
+**Contract between the DOM and its test.** These attribute names are fixed here
+so the wiring and the sensor cannot drift apart:
+
+- `data-observed-nm` --- observed wavelength in nm, on the readout element
+- `data-redshift-z` --- the redshift factor `z`
+- `data-spectrum-pos` --- marker position, 0–1 along the spectrum bar
+
+**Palette.** Deep navy/near-black for the space-side sections, warm off-white
+for the reading sections, charcoal text, one restrained warm accent. Spectrum
+colours are reserved for the spectrum bar and the star's glow --- they are the
+page's data, so nothing decorative is allowed to borrow them.
+
+**Motion.** Any ambient drift respects `prefers-reduced-motion`.
+
+**Scope discipline.** One idea, one mechanic. The slider experiment is *the*
+core interaction. A two-observers section and a physics-formula toggle are
+labelled stretch and are cut without guilt if the clock runs out --- one idea
+carried all the way beats more sections, thinner.
