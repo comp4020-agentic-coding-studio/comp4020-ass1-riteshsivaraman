@@ -291,39 +291,56 @@
               focusable="false"
             >
               <defs>
-                <radialGradient id="wellGlow">
-                  <stop offset="0%" stop-color="rgb(150 220 255)" stop-opacity="0.55" />
+                <linearGradient id="wellGlow" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="rgb(90 150 255)" stop-opacity="0.34" />
                   <stop offset="100%" stop-color="rgb(20 40 90)" stop-opacity="0" />
-                </radialGradient>
+                </linearGradient>
               </defs>
 
-              <!-- the well, drawn as nested shells -->
-              <circle cx="40" cy="100" r="120" fill="url(#wellGlow)" />
-              <g stroke="#243154" fill="none" stroke-dasharray="3 5">
-                <circle cx="40" cy="100" r="60" />
-                <circle cx="40" cy="100" r="110" />
-                <circle cx="40" cy="100" r="165" />
+              <!-- Distance from the mass, left to right, in horizon radii.
+                   Deeper in the well is further left. -->
+              <rect x="0" y="0" width="150" height="200" fill="url(#wellGlow)" />
+
+              <!-- the horizon: everything left of here is inside -->
+              <rect x="0" y="0" width="40" height="200" fill="#131a30" />
+              <line x1="40" y1="0" x2="40" y2="200" stroke="#46528a" stroke-dasharray="4 4" />
+              <text x="8" y="20" font-size="10" fill="#8593bd">horizon</text>
+
+              <!-- distance axis -->
+              <line x1="40" y1="150" x2="370" y2="150" stroke="#2a3557" />
+              <g font-size="10" fill="#6b78a3" text-anchor="middle">
+                <line x1="70" y1="146" x2="70" y2="154" stroke="#2a3557" />
+                <text x="70" y="168">2×</text>
+                <line x1="130" y1="146" x2="130" y2="154" stroke="#2a3557" />
+                <text x="130" y="168">4×</text>
+                <line x1="250" y1="146" x2="250" y2="154" stroke="#2a3557" />
+                <text x="250" y="168">8×</text>
+                <line x1="370" y1="146" x2="370" y2="154" stroke="#2a3557" />
+                <text x="370" y="168">12×</text>
               </g>
-              <circle cx="40" cy="100" r="26" fill="rgb(120 190 255)" />
-              <text x="40" y="104" text-anchor="middle" font-size="11" fill="#07101f">
-                mass
+              <text x="205" y="190" font-size="10" fill="#6b78a3" text-anchor="middle">
+                distance from the mass, in horizon radii
               </text>
 
               <!-- the light's journey, redrawn by the script -->
               <path
                 id="observer-ray"
-                d="M120 100 L300 100"
+                d="M70 90 L370 90"
                 stroke="rgb(0 255 145)"
                 stroke-width="3"
                 fill="none"
               />
-              <g id="observer-emit" transform="translate(120 100)">
-                <circle r="9" fill="rgb(0 255 145)" />
-                <text y="-18" text-anchor="middle" font-size="11" fill="#e8ecf7">emitted</text>
+              <g id="observer-emit" transform="translate(70 90)">
+                <circle r="8" fill="rgb(0 255 145)" />
+                <text y="-16" text-anchor="middle" font-size="10" fill="#e8ecf7">
+                  emitted
+                </text>
               </g>
-              <g id="observer-recv" transform="translate(300 100)">
-                <circle r="9" fill="#e8ecf7" />
-                <text y="-18" text-anchor="middle" font-size="11" fill="#e8ecf7">received</text>
+              <g id="observer-recv" transform="translate(370 90)">
+                <circle r="8" fill="#e8ecf7" />
+                <text y="-16" text-anchor="middle" font-size="10" fill="#e8ecf7">
+                  received
+                </text>
               </g>
             </svg>
           </div>
