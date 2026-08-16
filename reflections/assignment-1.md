@@ -31,8 +31,9 @@ remembered to ask of it. The habit I want to build is asking what I have pointed
 because that is the most fragile part, where ambiguities lead to poor and
 undesirable outcomes.
 
-If I can't trust green, the fallback isn't another test — it's looking. So the
-practice I want is an unglamorous one: open the real thing, at both sizes,
+If I can't trust green, the fallback isn't adding another test, but instead looking for the "why". Therefore one thing
+I want to change is an unglamorous but real and necessary habit: open the real output, at both sizes,
 repeatedly, and say what I see even when I can't yet say why. The vaguest,
-least technical thing I said all assignment was "this feels dead", and it was
-worth more than any check I owned.
+least technical thing I said during the assignment was "this feels dead", but it
+was still worth more than any check in the harness, which couldn't have felt
+that on its own.
