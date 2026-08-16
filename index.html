@@ -15,60 +15,166 @@
 
     <header>
       <nav class="site-nav" aria-label="Primary">
-        <span>Gravitational redshift</span>
+        <span class="site-nav__mark">Gravitational redshift</span>
         <a href="#experiment">The experiment</a>
       </nav>
     </header>
 
     <main>
-      <!-- 1. Hero -->
+      <!-- 1. Hero ------------------------------------------------------ -->
       <section class="section section--space hero" id="top">
         <div class="section__inner prose">
           <p class="eyebrow">An interactive explainer</p>
-          <h1>How does gravity change light?</h1>
+          <h1>Gravity changes the colour of light.</h1>
           <p class="lede">
-            Placeholder lede. One line setting up the question the page answers.
+            Not by bending it, or blocking it, or slowing it down. Light leaves
+            a heavy object at one colour and arrives at another — and if the
+            object is heavy enough, it arrives at no colour you can see at all.
           </p>
         </div>
+
         <div class="hero__stage">
-          <p class="lede">[ star + light beam diagram ]</p>
+          <svg
+            class="hero__art"
+            viewBox="0 0 320 180"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <defs>
+              <radialGradient id="starGlow">
+                <stop offset="0%" stop-color="rgb(180 255 240)" />
+                <stop offset="45%" stop-color="rgb(60 200 200)" stop-opacity="0.5" />
+                <stop offset="100%" stop-color="rgb(20 80 120)" stop-opacity="0" />
+              </radialGradient>
+              <linearGradient id="beamFade" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stop-color="rgb(120 245 220)" stop-opacity="0.9" />
+                <stop offset="100%" stop-color="rgb(255 90 60)" stop-opacity="0.15" />
+              </linearGradient>
+            </defs>
+
+            <!-- field lines: tighter near the star, opening outward -->
+            <g stroke="#2c3a63" fill="none" stroke-width="1">
+              <path d="M160 150 C 90 130, 60 80, 90 20" />
+              <path d="M160 150 C 120 125, 105 75, 125 12" />
+              <path d="M160 150 C 200 125, 215 75, 195 12" />
+              <path d="M160 150 C 230 130, 260 80, 230 20" />
+            </g>
+
+            <!-- the beam, reddening as it climbs -->
+            <rect x="152" y="10" width="16" height="140" fill="url(#beamFade)" rx="8" />
+
+            <circle cx="160" cy="150" r="46" fill="url(#starGlow)" />
+            <circle cx="160" cy="150" r="15" fill="rgb(190 255 245)" />
+          </svg>
         </div>
-        <p class="scroll-cue">Scroll</p>
+
+        <p class="scroll-cue" aria-hidden="true">Scroll</p>
       </section>
 
-      <!-- 2. Prediction -->
+      <!-- 2. Prediction ------------------------------------------------ -->
       <section class="section section--space" id="predict">
         <div class="section__inner prose">
           <p class="eyebrow">First, a guess</p>
-          <h2>What happens to light escaping a strong gravitational field?</h2>
-          <p class="lede">Placeholder framing line. No wrong answers.</p>
+          <h2>A star emits green light. You watch from far away. What do you see?</h2>
+          <p class="lede">
+            There's no penalty for guessing wrong — the point is to have an
+            answer in mind before you run the experiment.
+          </p>
         </div>
+
         <div class="section__inner">
-          <fieldset class="options">
+          <fieldset class="options" id="prediction">
             <legend class="visually-hidden">Your prediction</legend>
-            <button class="option" type="button">Placeholder option A</button>
-            <button class="option" type="button">Placeholder option B</button>
-            <button class="option" type="button">Placeholder option C</button>
-            <button class="option" type="button">Placeholder option D</button>
+            <button class="option" type="button" data-choice="same">
+              <span class="option__key">A</span>
+              Exactly the same green. Light doesn't change colour.
+            </button>
+            <button class="option" type="button" data-choice="dimmer">
+              <span class="option__key">B</span>
+              The same green, but dimmer.
+            </button>
+            <button class="option" type="button" data-choice="redder">
+              <span class="option__key">C</span>
+              A redder colour than it started.
+            </button>
+            <button class="option" type="button" data-choice="bluer">
+              <span class="option__key">D</span>
+              A bluer colour than it started.
+            </button>
           </fieldset>
+
+          <p class="verdict" id="verdict" hidden></p>
+
+          <p class="section__cta">
+            <a class="button" href="#experiment">Run the experiment</a>
+          </p>
         </div>
       </section>
 
-      <!-- 3. The experiment — the core interaction -->
+      <!-- 3. The experiment — simulation 1, the core interaction -------- -->
       <section class="section section--space" id="experiment">
         <div class="section__inner prose">
-          <p class="eyebrow">The experiment</p>
+          <p class="eyebrow">Simulation 1 — the core</p>
           <h2>Turn gravity up</h2>
-          <p class="lede">Placeholder instruction line for the slider.</p>
+          <p class="lede">
+            The star always emits the same 500&nbsp;nm green. The only thing
+            you're changing is how strong its gravity is.
+          </p>
         </div>
+
         <div class="section__inner experiment">
           <div class="experiment__stage">
-            <p class="lede">[ emitted vs. observed wave diagram ]</p>
+            <figure class="waves">
+              <figcaption class="waves__label">
+                Emitted at the surface — always 500&nbsp;nm
+              </figcaption>
+              <svg
+                class="waves__svg"
+                viewBox="0 0 400 44"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  id="wave-emitted"
+                  d="M0 22 L7.4 2.9 L14.8 2.9 L22.2 22 L29.6 41.1 L37 41.1 L44.4 22 L51.9 2.9 L59.3 2.9 L66.7 22 L74.1 41.1 L81.5 41.1 L88.9 22 L96.3 2.9 L103.7 2.9 L111.1 22 L118.5 41.1 L125.9 41.1 L133.3 22 L140.7 2.9 L148.1 2.9 L155.6 22 L163 41.1 L170.4 41.1 L177.8 22 L185.2 2.9 L192.6 2.9 L200 22 L207.4 41.1 L214.8 41.1 L222.2 22 L229.6 2.9 L237 2.9 L244.4 22 L251.9 41.1 L259.3 41.1 L266.7 22 L274.1 2.9 L281.5 2.9 L288.9 22 L296.3 41.1 L303.7 41.1 L311.1 22 L318.5 2.9 L325.9 2.9 L333.3 22 L340.7 41.1 L348.1 41.1 L355.6 22 L363 2.9 L370.4 2.9 L377.8 22 L385.2 41.1 L392.6 41.1 L400 22"
+                  fill="none"
+                  stroke="rgb(0 255 145)"
+                  stroke-width="2.5"
+                  vector-effect="non-scaling-stroke"
+                />
+              </svg>
+
+              <figcaption class="waves__label">
+                What reaches us — <span id="wave-observed-label">500&nbsp;nm</span>
+              </figcaption>
+              <svg
+                class="waves__svg"
+                viewBox="0 0 400 44"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  id="wave-observed"
+                  d="M0 22 L7.4 2.9 L14.8 2.9 L22.2 22 L29.6 41.1 L37 41.1 L44.4 22 L51.9 2.9 L59.3 2.9 L66.7 22 L74.1 41.1 L81.5 41.1 L88.9 22 L96.3 2.9 L103.7 2.9 L111.1 22 L118.5 41.1 L125.9 41.1 L133.3 22 L140.7 2.9 L148.1 2.9 L155.6 22 L163 41.1 L170.4 41.1 L177.8 22 L185.2 2.9 L192.6 2.9 L200 22 L207.4 41.1 L214.8 41.1 L222.2 22 L229.6 2.9 L237 2.9 L244.4 22 L251.9 41.1 L259.3 41.1 L266.7 22 L274.1 2.9 L281.5 2.9 L288.9 22 L296.3 41.1 L303.7 41.1 L311.1 22 L318.5 2.9 L325.9 2.9 L333.3 22 L340.7 41.1 L348.1 41.1 L355.6 22 L363 2.9 L370.4 2.9 L377.8 22 L385.2 41.1 L392.6 41.1 L400 22"
+                  fill="none"
+                  stroke="rgb(0 255 145)"
+                  stroke-width="2.5"
+                  vector-effect="non-scaling-stroke"
+                />
+              </svg>
+
+              <p class="waves__hint" id="waves-hint">
+                Same distance across, fewer waves fitting into it.
+              </p>
+            </figure>
           </div>
+
           <div class="experiment__panel">
             <div class="control">
               <label class="control__label" for="compactness">
-                Gravity (compactness)
+                Gravity at the surface
               </label>
               <input
                 id="compactness"
@@ -77,53 +183,274 @@
                 max="0.95"
                 step="0.01"
                 value="0"
+                aria-describedby="compactness-hint"
               />
+              <p class="control__hint" id="compactness-hint">
+                From no gravity at all, up to just short of a black hole.
+              </p>
             </div>
 
             <div class="spectrum">
-              <div class="spectrum__bar"></div>
-              <div class="spectrum__scale">
+              <div class="spectrum__bar">
+                <div class="spectrum__marker" id="spectrum-marker"></div>
+              </div>
+              <div class="spectrum__scale" aria-hidden="true">
                 <span>380nm</span>
+                <span>violet → red</span>
                 <span>780nm</span>
               </div>
             </div>
 
-            <div class="readout">
+            <div class="readout" id="readout" aria-live="polite">
               <div class="readout__cell">
                 <p class="readout__label">Observed wavelength</p>
-                <p class="readout__value">500nm</p>
+                <p class="readout__value" id="out-wavelength" data-observed-nm="500">
+                  500 nm
+                </p>
               </div>
               <div class="readout__cell">
                 <p class="readout__label">Redshift z</p>
-                <p class="readout__value">0.00</p>
+                <p class="readout__value" id="out-z" data-redshift-z="0">0.00</p>
               </div>
             </div>
+
+            <p class="status" id="visibility-status" data-spectrum-pos="0.3">
+              Still visible — this is the green it left with.
+            </p>
           </div>
         </div>
       </section>
 
-      <!-- 4. Explanation -->
+      <!-- 4. Explanation ----------------------------------------------- -->
       <section class="section section--paper" id="why">
         <div class="section__inner prose">
           <p class="eyebrow">What just happened</p>
-          <h2>Climbing out of a gravity well costs light energy</h2>
-          <p>Placeholder explanation paragraph one.</p>
-          <p>Placeholder explanation paragraph two.</p>
+          <h2>Climbing out of gravity costs light something</h2>
+          <p>
+            A colour is a wavelength: the distance between one crest of a light
+            wave and the next. Short wavelengths look violet and blue, long ones
+            look orange and red, and either side of that narrow band your eye
+            registers nothing at all.
+          </p>
+          <p>
+            Light escaping a massive object has to climb out of its gravity. It
+            can't slow down — light always travels at the same speed — so it
+            pays the toll the only other way it can: its wave stretches. The
+            crests spread further apart. The colour slides toward red.
+          </p>
+          <p>
+            That's the whole idea. <strong>Stronger gravity, longer wavelength.</strong>
+            Push it far enough and the wave stretches past red, out of the
+            visible band entirely, and the star goes dark — not because it
+            stopped shining, but because what it's shining is no longer
+            something an eye can catch.
+          </p>
+
+          <details class="physics">
+            <summary>Show me the actual relationship</summary>
+            <div class="physics__body">
+              <p class="physics__formula">1 + z = 1 / √(1 − 2GM ⁄ Rc²)</p>
+              <dl class="physics__key">
+                <dt>z</dt>
+                <dd>the redshift — how much longer the wave got, as a fraction</dd>
+                <dt>M, R</dt>
+                <dd>the object's mass and radius</dd>
+                <dt>G, c</dt>
+                <dd>the gravitational constant and the speed of light</dd>
+              </dl>
+              <p>
+                The slider above is the quantity <strong>2GM ⁄ Rc²</strong>: mass
+                and radius only ever appear together, so one control really is
+                enough. At 1 that denominator hits zero and the redshift becomes
+                infinite — that's the event horizon, and it's why the slider
+                stops at 0.95.
+              </p>
+            </div>
+          </details>
         </div>
       </section>
 
-      <!-- 5. Why it matters -->
+      <!-- 5. Two observers — simulation 2 ------------------------------- -->
+      <section class="section section--space" id="observers">
+        <div class="section__inner prose">
+          <p class="eyebrow">Simulation 2 — it's a relationship</p>
+          <h2>Redshift isn't something a star has</h2>
+          <p class="lede">
+            The first simulation quietly assumed you were watching from
+            infinitely far away. Drop that assumption and something changes:
+            the shift depends on <em>both</em> ends of the journey.
+          </p>
+        </div>
+
+        <div class="section__inner experiment">
+          <div class="experiment__stage">
+            <svg
+              class="well"
+              viewBox="0 0 400 200"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <defs>
+                <radialGradient id="wellGlow">
+                  <stop offset="0%" stop-color="rgb(150 220 255)" stop-opacity="0.55" />
+                  <stop offset="100%" stop-color="rgb(20 40 90)" stop-opacity="0" />
+                </radialGradient>
+              </defs>
+
+              <!-- the well, drawn as nested shells -->
+              <circle cx="40" cy="100" r="120" fill="url(#wellGlow)" />
+              <g stroke="#243154" fill="none" stroke-dasharray="3 5">
+                <circle cx="40" cy="100" r="60" />
+                <circle cx="40" cy="100" r="110" />
+                <circle cx="40" cy="100" r="165" />
+              </g>
+              <circle cx="40" cy="100" r="26" fill="rgb(120 190 255)" />
+              <text x="40" y="104" text-anchor="middle" font-size="11" fill="#07101f">
+                mass
+              </text>
+
+              <!-- the light's journey, redrawn by the script -->
+              <path
+                id="observer-ray"
+                d="M120 100 L300 100"
+                stroke="rgb(0 255 145)"
+                stroke-width="3"
+                fill="none"
+              />
+              <g id="observer-emit" transform="translate(120 100)">
+                <circle r="9" fill="rgb(0 255 145)" />
+                <text y="-18" text-anchor="middle" font-size="11" fill="#e8ecf7">emitted</text>
+              </g>
+              <g id="observer-recv" transform="translate(300 100)">
+                <circle r="9" fill="#e8ecf7" />
+                <text y="-18" text-anchor="middle" font-size="11" fill="#e8ecf7">received</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="experiment__panel">
+            <div class="control">
+              <label class="control__label" for="r-emit">
+                Light is emitted at
+              </label>
+              <input id="r-emit" type="range" min="1.05" max="12" step="0.05" value="2" />
+              <p class="control__hint">
+                <span id="r-emit-value">2.00</span>× the horizon radius
+              </p>
+            </div>
+
+            <div class="control">
+              <label class="control__label" for="r-recv">
+                Light is received at
+              </label>
+              <input id="r-recv" type="range" min="1.05" max="12" step="0.05" value="12" />
+              <p class="control__hint">
+                <span id="r-recv-value">12.00</span>× the horizon radius
+              </p>
+            </div>
+
+            <div class="readout" aria-live="polite">
+              <div class="readout__cell">
+                <p class="readout__label">Shift between them</p>
+                <p class="readout__value" id="out-pair-z" data-pair-z="0">0.00</p>
+              </div>
+              <div class="readout__cell">
+                <p class="readout__label">500 nm arrives as</p>
+                <p class="readout__value" id="out-pair-nm" data-pair-nm="500">500 nm</p>
+              </div>
+            </div>
+
+            <p class="status" id="pair-status">
+              Light climbing outward arrives redder than it left.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Real objects — simulation 3 -------------------------------- -->
+      <section class="section section--paper" id="real">
+        <div class="section__inner prose">
+          <p class="eyebrow">Simulation 3 — the real numbers</p>
+          <h2>How big is this effect, actually?</h2>
+          <p class="lede">
+            Everything above used a slider that goes all the way to a black
+            hole. Here is the same formula run against things that exist, with
+            their real masses and radii.
+          </p>
+        </div>
+
+        <div class="section__inner">
+          <div class="bodies" id="bodies" role="group" aria-label="Choose an object">
+            <button class="body-pick" type="button" data-body="earth" aria-pressed="false">
+              Earth
+            </button>
+            <button class="body-pick" type="button" data-body="sun" aria-pressed="false">
+              The Sun
+            </button>
+            <button class="body-pick" type="button" data-body="sirius-b" aria-pressed="true">
+              Sirius B
+            </button>
+            <button class="body-pick" type="button" data-body="neutron-star" aria-pressed="false">
+              Neutron star
+            </button>
+          </div>
+
+          <div class="body-card" aria-live="polite">
+            <h3 class="body-card__name" id="body-name">Sirius B</h3>
+            <p class="body-card__blurb" id="body-blurb">
+              A white dwarf: the Sun's mass inside something the size of Earth.
+              Its redshift was measured in 1925 and became early evidence for
+              general relativity.
+            </p>
+            <dl class="body-card__stats">
+              <div>
+                <dt>Redshift z</dt>
+                <dd id="body-z" data-body-z="2.59e-4">2.59 × 10⁻⁴</dd>
+              </div>
+              <div>
+                <dt>500 nm arrives as</dt>
+                <dd id="body-nm">500.13 nm</dd>
+              </div>
+              <div>
+                <dt>Compactness 2GM/Rc²</dt>
+                <dd id="body-x">5.18 × 10⁻⁴</dd>
+              </div>
+            </dl>
+            <p class="body-card__note" id="body-note">
+              A shift far too small to see, and large enough to measure.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. Why it matters --------------------------------------------- -->
       <section class="section section--paper" id="matters">
         <div class="section__inner prose">
           <p class="eyebrow">Why it matters</p>
-          <h2>We read gravity by reading colour</h2>
-          <p>Placeholder real-world tie-in paragraph.</p>
+          <h2>Colour is how we weigh things we can never visit</h2>
+          <p>
+            Nobody has been to Sirius B. Nobody has stood on a neutron star. But
+            light from both arrives here carrying a record of the gravity it
+            escaped, written into its wavelength — and that shift is measurable
+            from a telescope on Earth.
+          </p>
+          <p>
+            The same effect runs the satellite navigation in your pocket. Clocks
+            on GPS satellites sit higher in Earth's gravity than you do, so they
+            tick faster. Left uncorrected, the errors would accumulate to
+            kilometres in a day.
+          </p>
+          <p>
+            It's a small idea with a long reach: <strong>gravity is written into
+            the colour of light</strong>, and once you can read it, you can weigh
+            a star you'll never touch.
+          </p>
         </div>
       </section>
     </main>
 
     <footer class="site-footer">
-      <p>Built for COMP4020.</p>
+      <p>An interactive explainer, built for COMP4020.</p>
     </footer>
 
     <script type="module" src="./main.ts"></script>

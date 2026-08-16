@@ -290,10 +290,54 @@ p {
   gap: var(--space-2xs);
 }
 
+/* The gradient stops are generated from the same wavelengthToColor used by
+   the marker and the glow, so the bar cannot disagree with the physics. */
 .spectrum__bar {
+  position: relative;
   height: 2.5rem;
   border-radius: var(--radius);
   border: 1px solid var(--space-line);
+  background: linear-gradient(
+    to right,
+    rgb(77 0 77) 0%,
+    rgb(110 0 188) 6.3%,
+    rgb(43 0 255) 12.5%,
+    rgb(0 77 255) 18.8%,
+    rgb(0 204 255) 25%,
+    rgb(0 255 64) 31.3%,
+    rgb(73 255 0) 37.5%,
+    rgb(164 255 0) 43.8%,
+    rgb(255 255 0) 50%,
+    rgb(255 157 0) 56.3%,
+    rgb(255 59 0) 62.5%,
+    rgb(255 0 0) 68.8%,
+    rgb(255 0 0) 75%,
+    rgb(244 0 0) 81.3%,
+    rgb(188 0 0) 87.5%,
+    rgb(132 0 0) 93.8%,
+    rgb(77 0 0) 100%
+  );
+}
+
+.spectrum__marker {
+  position: absolute;
+  inset-block: -0.35rem;
+  width: 3px;
+  left: 30%;
+  background: #fff;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 55%);
+  transition: left 90ms linear;
+}
+
+.spectrum__marker::after {
+  content: "";
+  position: absolute;
+  inset-inline: -4px;
+  top: -6px;
+  height: 6px;
+  background: #fff;
+  clip-path: polygon(50% 100%, 0 0, 100% 0);
 }
 
 .spectrum__scale {
@@ -334,6 +378,9 @@ p {
 }
 
 .option {
+  display: flex;
+  gap: var(--space-s);
+  align-items: baseline;
   background: var(--space-raised);
   border: 1px solid var(--space-line);
   border-radius: var(--radius);
@@ -351,7 +398,10 @@ p {
 .button {
   justify-self: start;
   background: var(--accent);
-  color: #fff;
+
+  /* Dark on orange, not white on orange — white fails contrast here, which
+     the axe scan caught. */
+  color: var(--space);
   border: 0;
   border-radius: var(--radius);
   padding: var(--space-xs) var(--space-m);
@@ -370,6 +420,203 @@ p {
   font-size: var(--step-sm);
   text-align: center;
   border-top: 1px solid var(--space-line);
+}
+
+/* ---------------------------------------------------------------------------
+   Layer 3 — content.
+   --------------------------------------------------------------------------- */
+
+.hero__art {
+  width: min(100%, 22rem);
+  height: auto;
+}
+
+.control__hint,
+.status {
+  font-size: var(--step-sm);
+  color: var(--on-space-dim);
+}
+
+.status {
+  border-left: 2px solid var(--accent);
+  padding-left: var(--space-s);
+}
+
+/* --- Waves --------------------------------------------------------------- */
+
+.waves {
+  margin: 0;
+  display: grid;
+  gap: var(--space-2xs);
+  width: 100%;
+}
+
+.waves__label {
+  font-size: var(--step-sm);
+  color: var(--on-space-dim);
+}
+
+.waves__label:not(:first-child) {
+  margin-top: var(--space-s);
+}
+
+.waves__svg {
+  width: 100%;
+  height: 3.5rem;
+  overflow: visible;
+}
+
+.waves__hint {
+  font-size: var(--step-sm);
+  color: var(--on-space-dim);
+  margin-top: var(--space-s);
+}
+
+.well {
+  width: 100%;
+  height: auto;
+}
+
+/* --- Prediction ---------------------------------------------------------- */
+
+.option[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.option__key {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.verdict {
+  margin-top: var(--space-m);
+  padding: var(--space-s) var(--space-m);
+  border-radius: var(--radius);
+  background: var(--space-raised);
+  border: 1px solid var(--space-line);
+  max-width: var(--measure);
+}
+
+.section__cta {
+  margin-top: var(--space-l);
+  display: grid;
+}
+
+/* --- Physics disclosure -------------------------------------------------- */
+
+.physics {
+  border: 1px solid var(--paper-line);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  padding: var(--space-s) var(--space-m);
+}
+
+.physics summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--accent-on-paper);
+}
+
+.physics__body {
+  display: grid;
+  gap: var(--space-s);
+  margin-top: var(--space-s);
+}
+
+.physics__formula {
+  font-family: var(--font-mono);
+  font-size: var(--step-1);
+  overflow-x: auto;
+}
+
+.physics__key {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-2xs) var(--space-m);
+  margin: 0;
+  font-size: var(--step-sm);
+}
+
+.physics__key dt {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.physics__key dd {
+  margin: 0;
+  color: var(--on-paper-dim);
+}
+
+/* --- Real objects -------------------------------------------------------- */
+
+.bodies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  margin-bottom: var(--space-m);
+}
+
+.body-pick {
+  font: inherit;
+  padding: var(--space-2xs) var(--space-s);
+  border-radius: 999px;
+  border: 1px solid var(--paper-line);
+  background: var(--paper-raised);
+  color: var(--on-paper);
+  cursor: pointer;
+}
+
+.body-pick[aria-pressed="true"] {
+  background: var(--accent-on-paper);
+  border-color: var(--accent-on-paper);
+  color: #fff;
+}
+
+.body-card {
+  border: 1px solid var(--paper-line);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  padding: var(--space-m);
+  display: grid;
+  gap: var(--space-s);
+  max-width: var(--wide);
+}
+
+.body-card__name {
+  margin: 0;
+}
+
+.body-card__blurb {
+  max-width: var(--measure);
+  color: var(--on-paper-dim);
+}
+
+.body-card__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-s);
+  margin: 0;
+}
+
+.body-card__stats dt {
+  font-size: var(--step-sm);
+  color: var(--on-paper-dim);
+}
+
+.body-card__stats dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--step-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.body-card__note {
+  font-size: var(--step-sm);
+  color: var(--on-paper-dim);
+  border-left: 2px solid var(--accent-on-paper);
+  padding-left: var(--space-s);
 }
 
 @media (prefers-reduced-motion: reduce) {

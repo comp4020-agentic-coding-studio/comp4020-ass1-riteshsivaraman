@@ -264,6 +264,22 @@ page's data, so nothing decorative is allowed to borrow them.
 **Motion.** Any ambient drift respects `prefers-reduced-motion`.
 
 **Scope discipline.** One idea, one mechanic. The slider experiment is *the*
-core interaction. A two-observers section and a physics-formula toggle are
-labelled stretch and are cut without guilt if the clock runs out --- one idea
-carried all the way beats more sections, thinner.
+core interaction.
+
+The distinction that matters here, and that I got wrong the first time by
+filing both under "stretch": **more mechanics dilute; more visualisation of
+the same mechanic deepens.**
+
+- A second interaction (two draggable observers) is a second mechanic. It
+  competes with the core one for the reader's attention and for the clock.
+  Not built.
+- Revealing the formula that is *already* driving the page adds no mechanic at
+  all. It lives inside the experiment section as the conclusion, not as its own
+  beat.
+- How rich the core diagram is costs nothing in scope terms and is where the
+  effort goes: wave crests that visibly stretch, a beam and glow that shift
+  colour and go dark past the visible band, field lines that tighten with
+  compactness, a real spectrum gradient with a clamped "beyond visible" state.
+
+So "is there room for more?" has two answers depending on which of those is
+being asked, and only the second one is a yes.
