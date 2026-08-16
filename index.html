@@ -202,7 +202,8 @@
                 aria-describedby="compactness-hint"
               />
               <p class="control__hint" id="compactness-hint">
-                From no gravity at all, up to just short of a black hole.
+                Escape velocity <strong id="escape-value">0%</strong> of light
+                speed — from no gravity at all, up to just short of a black hole.
               </p>
 
             <label class="animate">
@@ -456,13 +457,7 @@
               </figcaption>
 
               <div class="zoom__lane" id="zoom-lane">
-                <div class="zoom__grid" aria-hidden="true">
-                  <span class="zoom__gridline"></span>
-                  <span class="zoom__gridline"></span>
-                  <span class="zoom__gridline"></span>
-                  <span class="zoom__gridline"></span>
-                  <span class="zoom__gridline"></span>
-                </div>
+                <div class="zoom__grid" id="zoom-grid" aria-hidden="true"></div>
                 <div class="zoom__mark zoom__mark--emitted" id="mark-emitted">
                   <span class="zoom__flag">emitted · 500 nm</span>
                 </div>
@@ -471,10 +466,8 @@
                 </div>
               </div>
 
-              <div class="zoom__scale" id="zoom-ticks">
-                <span>499.9</span><span>500.0</span><span>500.1</span>
-                <span>500.2</span><span>500.3</span>
-              </div>
+              <div class="zoom__scale" id="zoom-ticks"></div>
+              <p class="zoom__caption">nanometres from the emitted 500&nbsp;nm</p>
             </figure>
 
             <div class="control">

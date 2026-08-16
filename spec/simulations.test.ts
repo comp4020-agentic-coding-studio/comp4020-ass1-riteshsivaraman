@@ -241,17 +241,74 @@ describe("the prediction shows whether you were right", () => {
 });
 
 describe("simulation 3 has a scale to read against", () => {
+  const positions = () =>
+    [...doc.querySelectorAll<HTMLElement>("#zoom-lane .zoom__gridline")]
+      .map((g) => g.style.left)
+      .join(" ");
+
   it("draws gridlines in the lane", () => {
     expect(doc.querySelectorAll("#zoom-lane .zoom__gridline").length).toBeGreaterThan(2);
   });
 
-  it("labels the gridlines with wavelengths that change as you zoom", () => {
+  it("moves the gridlines themselves as the scale changes", () => {
+    // The defect this replaces: the lines sat at 0/25/50/75/100% at every
+    // magnification because CSS flex spaced them, and only the labels under
+    // them changed. A grid positioned by the layout engine rather than by the
+    // data cannot show a change of scale, however its labels read.
+    //
+    // Sampled across a decade rather than between two whole ones: a window of
+    // 400/10ⁿ nm is self-similar at exact powers of ten, so those land on the
+    // same fractions by construction. Dragging the slider is a continuous
+    // sweep, and that is where the lines have to be seen to slide.
+    const seen = new Set<string>();
+    for (let e = 2; e <= 3; e += 0.1) {
+      setRange("#zoom", Number(e.toFixed(1)));
+      seen.add(positions());
+    }
+    expect(seen.size).toBeGreaterThan(3);
+  });
+
+  it("puts the ticks on round numbers, not on the window edges", () => {
+    setRange("#zoom", 2);
+    const labels = [...doc.querySelectorAll("#zoom-ticks span")].map((t) => t.textContent!);
+    expect(labels.length).toBeGreaterThan(2);
+    for (const label of labels) {
+      expect(label, `"${label}" is not a round offset`).toMatch(/^(0|[+−]\d+(\.\d+)?)$/);
+    }
+    expect(labels).toContain("0");
+  });
+
+  it("relabels as you zoom", () => {
     const read = () =>
       [...doc.querySelectorAll("#zoom-ticks span")].map((t) => t.textContent).join("|");
     setRange("#zoom", 1);
     const wide = read();
     setRange("#zoom", 6);
     expect(read()).not.toBe(wide);
+  });
+});
+
+describe("the gravity slider says how much gravity", () => {
+  it("quantifies itself, like every other slider on the page", () => {
+    // It was the only one without a number against it.
+    expect(doc.querySelector("#escape-value")).toBeTruthy();
+  });
+
+  it("reads zero with no gravity and near light speed at the ceiling", () => {
+    setRange("#compactness", 0);
+    expect(doc.querySelector("#escape-value")!.textContent).toBe("0%");
+    setRange("#compactness", 0.95);
+    expect(doc.querySelector("#escape-value")!.textContent).toBe("97%");
+  });
+
+  it("never claims light can be outrun", () => {
+    for (const x of [0, 0.4, 0.95]) {
+      setRange("#compactness", x);
+      const pct = Number(
+        doc.querySelector<HTMLElement>("#escape-value")!.dataset.escapeFraction,
+      );
+      expect(pct).toBeLessThanOrEqual(1);
+    }
   });
 });
 

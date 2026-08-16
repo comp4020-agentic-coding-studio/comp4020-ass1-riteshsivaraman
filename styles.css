@@ -857,9 +857,16 @@ input[type="range"] {
 }
 
 .zoom__scale {
-  display: flex;
-  justify-content: space-between;
+  position: relative;
+  height: 1.35rem;
   font-family: var(--font-mono);
+}
+
+.zoom__scale span {
+  position: absolute;
+  translate: -50% 0;
+  white-space: nowrap;
+  transition: left var(--dur) var(--ease);
 }
 
 .zoom__lane {
@@ -877,17 +884,20 @@ input[type="range"] {
 .zoom__grid {
   position: absolute;
   inset: 0;
-  display: flex;
-  justify-content: space-between;
 }
 
+/* Positioned by wavelength, not spaced by the layout engine — so the lines
+   move and reflow as the window narrows, which is the whole point of a scale. */
 .zoom__gridline {
+  position: absolute;
+  inset-block: 0;
   width: 1px;
   background: rgb(122 134 170 / 22%);
+  transition: left var(--dur) var(--ease);
 }
 
-.zoom__gridline:nth-child(3) {
-  background: rgb(122 134 170 / 40%);
+.zoom__gridline.is-origin {
+  background: rgb(122 134 170 / 45%);
 }
 
 .zoom__mark {

@@ -11,6 +11,7 @@ import {
   MIN_RADII,
   compactnessOf,
   compactnessToRedshift,
+  escapeFraction,
   observedWavelength,
   redshiftBetweenRadii,
 } from "./redshift";
@@ -22,6 +23,8 @@ import {
   wavelengthToCss,
 } from "./spectrum";
 import { BASE_CRESTS, crestsForRedshift, sineWavePath } from "./wave";
+import { niceStep, niceTicks, offsetLabel } from "./ticks";
+import { advance, type Direction } from "./sweep";
 
 const WAVE_WIDTH = 400;
 const WAVE_HEIGHT = 44;
@@ -62,26 +65,32 @@ function wireAnimateToggles(doc: Document): void {
     const min = Number(input.min);
     const max = Number(input.max);
     let raf = 0;
-    let started = 0;
+    let last = 0;
+
+    // Direction lives outside the animation, so pausing and resuming keeps
+    // travelling the same way. It only resets when a person moves the control.
+    let direction: Direction = 1;
 
     // User-visible state first, animation bookkeeping second. The other order
     // meant that if cancelAnimationFrame was missing, the throw happened
-    // before the checkbox was cleared and the toggle stuck on — which is
-    // exactly what the test found, because jsdom has no rAF unless asked.
+    // before the checkbox was cleared and the toggle stuck on.
     const stop = () => {
       box.checked = false;
       input.classList.remove("is-demoing");
-      started = 0;
+      last = 0;
       if (raf) view.cancelAnimationFrame?.(raf);
       raf = 0;
     };
 
     const frame = (now: number) => {
       if (!box.checked) return;
-      if (!started) started = now;
-      // A full out-and-back every 9s, eased at the turns so it never snaps.
-      const swing = (1 - Math.cos(((now - started) / 9000) * 2 * Math.PI)) / 2;
-      input.value = String(min + (max - min) * swing);
+      const dt = last ? now - last : 0;
+      last = now;
+      // Position is the state, not phase — so this picks up wherever the
+      // control currently sits rather than snapping back to the minimum.
+      const next = advance({ value: Number(input.value), direction }, dt, min, max, SWEEP_MS);
+      direction = next.direction;
+      input.value = String(next.value);
       input.dispatchEvent(new view.Event("input", { bubbles: true }));
       raf = view.requestAnimationFrame(frame);
     };
@@ -95,19 +104,24 @@ function wireAnimateToggles(doc: Document): void {
         box.checked = false;
         return;
       }
+      last = 0;
       input.classList.add("is-demoing");
       raf = view.requestAnimationFrame(frame);
     });
 
     // Taking hold of the control turns the animation off rather than fighting
-    // it. Nothing is more annoying than a slider that pulls back.
+    // it, and points it forwards again for next time.
     for (const event of ["pointerdown", "keydown", "touchstart"]) {
       input.addEventListener(event, () => {
+        direction = 1;
         if (box.checked) stop();
       });
     }
   }
 }
+
+/** One full out-and-back. */
+const SWEEP_MS = 9000;
 
 function prefersReducedMotion(doc: Document): boolean {
   return doc.defaultView?.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
@@ -156,6 +170,7 @@ function wireExperiment(doc: Document, star: Star): void {
   const outWavelength = doc.querySelector<HTMLElement>("#out-wavelength");
   const outZ = doc.querySelector<HTMLElement>("#out-z");
   const status = doc.querySelector<HTMLElement>("#visibility-status");
+  const escape = doc.querySelector<HTMLElement>("#escape-value");
 
   // The emitted trace never changes: same star, same 500nm, every time.
   emittedPath?.setAttribute("d", sineWavePath(WAVE_WIDTH, WAVE_HEIGHT, BASE_CRESTS));
@@ -192,6 +207,14 @@ function wireExperiment(doc: Document, star: Star): void {
     if (status) {
       status.dataset.spectrumPos = position.toFixed(4);
       status.textContent = describe(x, observedNm, visible);
+    }
+
+    // The only slider on the page that had no number against it. Escape
+    // velocity follows from the compactness alone, so it adds a quantity
+    // without smuggling in a second variable.
+    if (escape) {
+      escape.textContent = `${(escapeFraction(x) * 100).toFixed(0)}%`;
+      escape.dataset.escapeFraction = escapeFraction(x).toFixed(4);
     }
 
     star(x, observedNm);
@@ -363,7 +386,8 @@ function wireBodies(doc: Document): void {
   const observedMark = doc.querySelector<HTMLElement>("#mark-observed");
   const observedFlag = doc.querySelector<HTMLElement>("#mark-observed-flag");
   const bracket = doc.querySelector<HTMLElement>("#band-window");
-  const ticks = [...doc.querySelectorAll<HTMLElement>("#zoom-ticks span")];
+  const ticksRow = doc.querySelector<HTMLElement>("#zoom-ticks");
+  const grid = doc.querySelector<HTMLElement>("#zoom-grid");
   const windowNote = doc.querySelector<HTMLElement>("#window-note");
 
   let current = BODIES[0];
@@ -402,12 +426,37 @@ function wireBodies(doc: Document): void {
       bracket.style.left = `${(((EMITTED_NM - span / 2 - VISIBLE_MIN_NM) / BAND_NM) * 100).toFixed(3)}%`;
     }
 
-    // One label per gridline, so the grid is a scale you can read rather than
-    // decoration — and so the scale visibly changes as you zoom.
-    ticks.forEach((tick, i) => {
-      const at = EMITTED_NM - span / 2 + (span * i) / (ticks.length - 1);
-      tick.textContent = trimNm(at);
-    });
+    // Ticks at round wavelengths, so the lines themselves move and reflow as
+    // you zoom. Spacing them evenly by layout put them at 0/25/50/75/100% at
+    // every magnification — a grid that never changed while claiming to show a
+    // change of scale.
+    const windowStart = EMITTED_NM - span / 2;
+    const step = niceStep(span / 4);
+    const values = niceTicks(windowStart, windowStart + span, 5);
+    const place = (v: number) => ((v - windowStart) / span) * 100;
+
+    if (grid) {
+      grid.replaceChildren(
+        ...values.map((v) => {
+          const line = doc.createElement("span");
+          line.className = "zoom__gridline";
+          if (Math.abs(v - EMITTED_NM) < step / 2) line.classList.add("is-origin");
+          line.style.left = `${place(v).toFixed(3)}%`;
+          return line;
+        }),
+      );
+    }
+
+    if (ticksRow) {
+      ticksRow.replaceChildren(
+        ...values.map((v) => {
+          const label = doc.createElement("span");
+          label.textContent = offsetLabel(v, EMITTED_NM, step);
+          label.style.left = `${place(v).toFixed(3)}%`;
+          return label;
+        }),
+      );
+    }
     if (windowNote) {
       windowNote.textContent =
         magnification < 1.5

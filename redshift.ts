@@ -48,6 +48,20 @@ export function observedFromCompactness(
   return { z, observedNm: observedWavelength(emittedNm, z) };
 }
 
+/**
+ * Escape velocity at the surface, as a fraction of the speed of light.
+ *
+ *   v_esc / c = √(2GM/Rc²) = √x
+ *
+ * This is the honest way to put a number on the slider. It follows from the
+ * compactness alone — no radius to invent, no second variable smuggled in —
+ * and it says something a reader can hold: at 0.95 the light is climbing out
+ * of a well whose escape velocity is 97% of light speed.
+ */
+export function escapeFraction(x: number): number {
+  return Math.sqrt(Math.min(Math.max(x, 0), MAX_COMPACTNESS));
+}
+
 // --- Two positions in the same well ----------------------------------------
 //
 // The slider above quietly assumes the receiver is infinitely far away. That
