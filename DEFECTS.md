@@ -151,8 +151,8 @@ Nothing outstanding. Add a row here to report something outside a session —
 | Star clashes with text | feel | Text over the star had no scrim | *human-only; scrim rule* | `ec12383` |
 | "Scroll" text unappealing | feel | — | *human-only* | `ec12383` |
 | Wanted animate toggles | feel | Self-demo plays once, can't be re-run | animate-toggle tests (`ec12383`) | `ec12383` |
-| Landing screen has no scroll indication | unclear | Affordance encoded on a hairline (1.0×48.0px) | affordance min-size (`data-affordance`) | this pass |
-| MCQ doesn't show right/wrong visually | unclear | State carried in prose only | prediction correctness tests | this pass |
-| Sliders animate on their own | feel | Motion nobody asked for; the *rule* caused it | "animates nothing on load" | this pass |
-| Sim 2 receiver has no animate box | feel | Hand-maintained coverage, again | toggle derived from every slider | this pass |
-| Sim 3 needs a grid to read scale against | feel | No reference frame for the change | gridline + tick tests | this pass |
+| Landing screen has no scroll indication | unclear | Affordance encoded on a hairline (1.0×48.0px) | affordance min-size (`data-affordance`) | `daa8b8a` |
+| MCQ doesn't show right/wrong visually | unclear | State carried in prose only | prediction correctness tests | `daa8b8a` |
+| Sliders animate on their own | feel | Motion nobody asked for; the *rule* caused it | "animates nothing on load" | `daa8b8a` |
+| Sim 2 receiver has no animate box | feel | Hand-maintained coverage, again | toggle derived from every slider | `daa8b8a` |
+| Sim 3 needs a grid to read scale against | feel | No reference frame for the change | gridline + tick tests | `daa8b8a` |
