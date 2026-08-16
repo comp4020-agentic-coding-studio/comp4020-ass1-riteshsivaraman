@@ -156,6 +156,6 @@ Nothing outstanding. Add a row here to report something outside a session —
 | Sliders animate on their own | feel | Motion nobody asked for; the *rule* caused it | "animates nothing on load" | `daa8b8a` |
 | Sim 2 receiver has no animate box | feel | Hand-maintained coverage, again | toggle derived from every slider | `daa8b8a` |
 | Sim 3 needs a grid to read scale against | feel | No reference frame for the change | gridline + tick tests | `daa8b8a` |
-| Sim 3 gridlines don't change with the scale | broken | Grid positioned by layout, not by data | gridline-position test; `ticks.ts` unit tests | `HEAD` |
-| Animation restarts from the minimum | feel | Phase was the state, not position | `sweep.ts` unit tests | `HEAD` |
-| Gravity slider has no quantifier | unclear | The only slider with no value shown | slider-quantifier tests | `HEAD` |
+| Sim 3 gridlines don't change with the scale | broken | Grid positioned by layout, not by data | gridline-position test; `ticks.ts` unit tests | `f17ceca` |
+| Animation restarts from the minimum | feel | Phase was the state, not position | `sweep.ts` unit tests | `f17ceca` |
+| Gravity slider has no quantifier | unclear | The only slider with no value shown | slider-quantifier tests | `f17ceca` |
