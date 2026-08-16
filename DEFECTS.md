@@ -4,6 +4,27 @@ The loop this feeds is in `CLAUDE.md` under **The defect loop**. This file is
 the front door to it: how to report something, what happens next, and what has
 already been through it.
 
+## Where to report
+
+**Paste it into the chat.** That is the channel — there is no tracker to file
+into and no form to submit. One line is enough (see the quick form below), and
+several at once is fine and usually better, because a batch gets triaged
+together rather than one interruption at a time.
+
+Two other places, for when chat isn't where you are:
+
+- **The Open list at the bottom of this file.** Add a row and commit it. Use
+  this when you're reading the page away from a session, or want the report to
+  survive one. Anything sitting there gets picked up at the start of the next
+  session.
+- **Nothing else.** Don't open GitHub issues for this — the repo has no issue
+  workflow, and a report nobody is watching is worse than one that was never
+  written.
+
+Reports move from **Open** to **Log** once they've been through all six steps,
+so the two tables together are the state of the system: what's outstanding, and
+what's been dealt with and how.
+
 ## Report symptoms, not diagnoses
 
 The division of labour that has held for this whole build:
@@ -23,7 +44,7 @@ part that matters.
 
 Most reports need one line. This is enough:
 
-```
+```text
 [where] [viewport] what you saw — what you expected instead
 ```
 
@@ -108,6 +129,15 @@ plainly rather than quietly worked around.
    default to `objectBoundingBox` units, so the bloom filter's region collapsed
    to nothing. Changed to a `<rect>`, which has area.
 6. **Designed out.** Marks that carry meaning are rects, not zero-area lines.
+
+## Open
+
+Nothing outstanding. Add a row here to report something outside a session —
+`what you saw` and `where` are the only fields that must be filled in.
+
+| What I saw | Where | Viewport | Kind | Expected instead |
+| --- | --- | --- | --- | --- |
+| _(empty)_ | | | | |
 
 ## Log
 
