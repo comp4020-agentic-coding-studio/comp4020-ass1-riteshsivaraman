@@ -388,10 +388,13 @@ of bug unreachable rather than merely detectable.
 this already with a translucent background and a backdrop blur; ledes sitting
 directly over the star do not, and that is where the colour clashes.
 
-**Salience carries meaning.** If a visual property encodes physics, it has to
-be a *prominent* property — area, position, large-scale colour. Never a
-hairline. Simulation 2 originally encoded its entire result in the hue of a 3px
-line, which is why nobody could see that it was working.
+**Salience carries meaning.** If a visual property encodes physics *or offers
+an affordance*, it has to be a *prominent* property — area, position,
+large-scale colour. Never a hairline. This holds for controls and cues, not
+only for data: a scroll cue was once replaced by a 1px line, which rendered at
+1.0x48.0 and read as nothing at all. Affordances carry `data-affordance` and
+are checked for a 16px minimum. Simulation 2 originally encoded its entire
+result in the hue of a 3px line, which is why nobody could see it working.
 
 **What counts as a simulation.** Four conditions; something failing these is a
 diagram or a filtered table, not a simulation:
@@ -399,8 +402,15 @@ diagram or a filtered table, not a simulation:
 1. It **depicts** the phenomenon rather than reporting numbers about it.
 2. It changes **continuously**, not in jumps.
 3. It is legible **at a glance at 390px**, not only after reading the labels.
-4. It has a **resting state that demonstrates itself** — it shows what it does
-   before the reader touches anything, rather than waiting to be discovered.
+4. It offers a way to **watch it without operating it** — an animate toggle,
+   off by default.
+
+   This condition previously read "has a resting state that demonstrates
+   itself", and simulations auto-played once when scrolled into view. That was
+   wrong: it is motion nobody asked for, it starts while you are still reading
+   the paragraph above it, and once a toggle exists it is redundant as well as
+   annoying. The rule caused the defect, so the rule changed. **Nothing on this
+   page moves until it is asked to.**
 
 **Scope discipline.** One idea, one mechanic. The slider experiment is *the*
 core interaction.

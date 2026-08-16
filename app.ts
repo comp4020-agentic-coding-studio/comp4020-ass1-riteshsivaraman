@@ -200,7 +200,6 @@ function wireExperiment(doc: Document, star: Star): void {
   slider.addEventListener("input", update);
   update();
 
-  demonstrate(doc, slider, { from: 0, to: 0.95, period: 7000 });
 }
 
 function describe(x: number, observedNm: number, visible: boolean): string {
@@ -212,75 +211,6 @@ function describe(x: number, observedNm: number, visible: boolean): string {
   }
   if (observedNm > 620) return "Deep red, and close to the edge of what an eye can register.";
   return "Stretched toward red, and still visible.";
-}
-
-// --- Self-demonstration -----------------------------------------------------
-//
-// A simulation that waits to be discovered mostly isn't. Each one plays itself
-// once when it first scrolls into view, then hands over the moment the reader
-// touches anything. The dashed outline says it is playing, so nobody thinks the
-// control is stuck.
-
-function demonstrate(
-  doc: Document,
-  input: HTMLInputElement,
-  { from, to, period }: { from: number; to: number; period: number },
-): void {
-  const view = doc.defaultView;
-  if (!view || prefersReducedMotion(doc) || typeof view.IntersectionObserver !== "function") {
-    return;
-  }
-
-  let raf = 0;
-  let started = 0;
-  let running = false;
-  let cancelled = false;
-
-  // `cancelled` is separate from `running` on purpose. Touching the control
-  // before the demo has begun has to prevent it from ever beginning — with a
-  // one-shot listener, an early cancel is simply consumed and the demo takes
-  // the control back a moment later, which is worse than never demoing.
-  const stop = () => {
-    cancelled = true;
-    if (!running) return;
-    running = false;
-    view.cancelAnimationFrame(raf);
-    input.classList.remove("is-demoing");
-  };
-
-  const frame = (now: number) => {
-    if (!running) return;
-    if (!started) started = now;
-    const t = (now - started) / period;
-    if (t >= 1) {
-      stop();
-      return;
-    }
-    // Out and back, eased, so it settles where it started rather than
-    // stranding the reader at an arbitrary value.
-    const swing = (1 - Math.cos(t * 2 * Math.PI)) / 2;
-    input.value = String(from + (to - from) * swing);
-    input.dispatchEvent(new view.Event("input", { bubbles: true }));
-    raf = view.requestAnimationFrame(frame);
-  };
-
-  for (const event of ["pointerdown", "keydown", "wheel", "touchstart"]) {
-    input.addEventListener(event, stop);
-  }
-
-  const observer = new view.IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting || running || started || cancelled) continue;
-        running = true;
-        input.classList.add("is-demoing");
-        raf = view.requestAnimationFrame(frame);
-        observer.disconnect();
-      }
-    },
-    { threshold: 0.55 },
-  );
-  observer.observe(input);
 }
 
 // --- Prediction -------------------------------------------------------------
@@ -303,8 +233,18 @@ function wirePrediction(doc: Document): void {
   for (const option of options) {
     option.setAttribute("aria-pressed", "false");
     option.addEventListener("click", () => {
-      for (const other of options) other.setAttribute("aria-pressed", "false");
+      for (const other of options) {
+        other.setAttribute("aria-pressed", "false");
+        other.classList.remove("is-correct", "is-wrong");
+      }
       option.setAttribute("aria-pressed", "true");
+
+      // Right or wrong carried by colour and a mark, not only by a paragraph
+      // the reader has to decode. The verdict still does the teaching.
+      const right = option.dataset.correct === "true";
+      option.classList.add(right ? "is-correct" : "is-wrong");
+      verdict.classList.toggle("is-correct", right);
+      verdict.classList.toggle("is-wrong", !right);
       verdict.textContent = VERDICTS[option.dataset.choice ?? ""] ?? "";
       verdict.hidden = false;
     });
@@ -378,7 +318,6 @@ function wireObservers(doc: Document): void {
   recv.addEventListener("input", update);
   update();
 
-  demonstrate(doc, emit, { from: 6, to: MIN_RADII, period: 6000 });
 }
 
 function clampRadius(r: number): number {
@@ -424,8 +363,7 @@ function wireBodies(doc: Document): void {
   const observedMark = doc.querySelector<HTMLElement>("#mark-observed");
   const observedFlag = doc.querySelector<HTMLElement>("#mark-observed-flag");
   const bracket = doc.querySelector<HTMLElement>("#band-window");
-  const windowLeft = doc.querySelector<HTMLElement>("#window-left");
-  const windowRight = doc.querySelector<HTMLElement>("#window-right");
+  const ticks = [...doc.querySelectorAll<HTMLElement>("#zoom-ticks span")];
   const windowNote = doc.querySelector<HTMLElement>("#window-note");
 
   let current = BODIES[0];
@@ -464,8 +402,12 @@ function wireBodies(doc: Document): void {
       bracket.style.left = `${(((EMITTED_NM - span / 2 - VISIBLE_MIN_NM) / BAND_NM) * 100).toFixed(3)}%`;
     }
 
-    if (windowLeft) windowLeft.textContent = `${trimNm(EMITTED_NM - span / 2)} nm`;
-    if (windowRight) windowRight.textContent = `${trimNm(EMITTED_NM + span / 2)} nm`;
+    // One label per gridline, so the grid is a scale you can read rather than
+    // decoration — and so the scale visibly changes as you zoom.
+    ticks.forEach((tick, i) => {
+      const at = EMITTED_NM - span / 2 + (span * i) / (ticks.length - 1);
+      tick.textContent = trimNm(at);
+    });
     if (windowNote) {
       windowNote.textContent =
         magnification < 1.5

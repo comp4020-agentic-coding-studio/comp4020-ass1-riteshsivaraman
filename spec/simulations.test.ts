@@ -173,8 +173,16 @@ describe("the beam depicts the shift, rather than reporting it", () => {
 describe("animate toggles", () => {
   const boxes = () => [...doc.querySelectorAll<HTMLInputElement>("[data-animate]")];
 
-  it("offers one on every simulation", () => {
-    expect(boxes()).toHaveLength(doc.querySelectorAll("[data-sim]").length);
+  it("gives every simulation slider its own toggle", () => {
+    // Derived from the controls, not counted against a number I maintain by
+    // hand — which is how r-recv ended up as the one slider you could not
+    // animate, and how the filmstrip list missed a whole simulation before it.
+    const targets = new Set(boxes().map((b) => b.dataset.animate));
+    for (const range of doc.querySelectorAll<HTMLInputElement>(
+      "[data-sim] input[type=range]",
+    )) {
+      expect(targets.has(range.id), `#${range.id} has no animate toggle`).toBe(true);
+    }
   });
 
   it("points each toggle at a control that exists", () => {
@@ -187,14 +195,63 @@ describe("animate toggles", () => {
     for (const box of boxes()) expect(box.checked).toBe(false);
   });
 
+  it("animates nothing on load", () => {
+    // Motion nobody asked for. The page waits.
+    expect(doc.querySelectorAll(".is-demoing")).toHaveLength(0);
+  });
+
   it("switches itself off when you take hold of the control", () => {
-    // A slider that pulls back against the hand is worse than no animation.
     for (const box of boxes()) {
       const input = doc.querySelector<HTMLInputElement>(`#${box.dataset.animate}`)!;
       box.checked = true;
       input.dispatchEvent(new window.Event("pointerdown", { bubbles: true }));
       expect(box.checked).toBe(false);
     }
+  });
+});
+
+describe("the prediction shows whether you were right", () => {
+  it("records which answer is the correct one", () => {
+    const correct = [...doc.querySelectorAll<HTMLElement>(".option")].filter(
+      (o) => o.dataset.correct === "true",
+    );
+    expect(correct).toHaveLength(1);
+    expect(correct[0].dataset.choice).toBe("redder");
+  });
+
+  it("marks the chosen answer right or wrong, not only in prose", () => {
+    // Salience: a verdict a reader has to parse a paragraph to decode is not
+    // an indication.
+    click('[data-choice="redder"]');
+    expect(doc.querySelector('[data-choice="redder"]')!.className).toMatch(/is-correct/);
+    click('[data-choice="dimmer"]');
+    expect(doc.querySelector('[data-choice="dimmer"]')!.className).toMatch(/is-wrong/);
+  });
+
+  it("clears the previous mark when you change your answer", () => {
+    click('[data-choice="dimmer"]');
+    click('[data-choice="redder"]');
+    expect(doc.querySelector('[data-choice="dimmer"]')!.className).not.toMatch(/is-wrong/);
+  });
+
+  it("carries the state on the verdict too", () => {
+    click('[data-choice="redder"]');
+    expect(doc.querySelector("#verdict")!.className).toMatch(/is-correct/);
+  });
+});
+
+describe("simulation 3 has a scale to read against", () => {
+  it("draws gridlines in the lane", () => {
+    expect(doc.querySelectorAll("#zoom-lane .zoom__gridline").length).toBeGreaterThan(2);
+  });
+
+  it("labels the gridlines with wavelengths that change as you zoom", () => {
+    const read = () =>
+      [...doc.querySelectorAll("#zoom-ticks span")].map((t) => t.textContent).join("|");
+    setRange("#zoom", 1);
+    const wide = read();
+    setRange("#zoom", 6);
+    expect(read()).not.toBe(wide);
   });
 });
 

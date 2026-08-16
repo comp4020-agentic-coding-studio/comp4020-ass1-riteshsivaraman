@@ -296,30 +296,36 @@ p {
   gap: var(--space-l);
 }
 
-/* A drawn cue rather than the word "Scroll": a line that falls, repeatedly.
-   Nothing to read, and it points where it means. */
+/* A scroll affordance with area. The previous version was a 1px line, which
+   is the hairline-salience failure this repo's own rules forbid — it rendered
+   at 1.0x48.0 and read as nothing at all. */
 .scroll-cue {
   position: absolute;
   bottom: var(--space-l);
   left: 50%;
   translate: -50% 0;
-  width: 1px;
-  height: 3rem;
-  overflow: hidden;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    rgb(153 165 196 / 35%)
-  );
+  width: 1.75rem;
+  height: 2.85rem;
+  border: 2px solid rgb(153 165 196 / 55%);
+  border-radius: 1rem;
+  text-decoration: none;
+  transition: border-color var(--dur) var(--ease);
 }
 
-.scroll-cue__line {
+.scroll-cue:hover {
+  border-color: var(--accent);
+}
+
+.scroll-cue__dot {
   position: absolute;
-  inset-inline: 0;
-  top: -60%;
-  height: 60%;
-  background: linear-gradient(to bottom, transparent, var(--accent));
-  animation: fall 2.4s var(--ease-soft) infinite;
+  left: 50%;
+  top: 0.45rem;
+  translate: -50% 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: fall 2.2s var(--ease-soft) infinite;
 }
 
 @keyframes fall {
@@ -328,12 +334,17 @@ p {
     opacity: 0;
   }
 
-  30% {
+  25% {
     opacity: 1;
   }
 
+  75% {
+    transform: translateY(1.25rem);
+    opacity: 0;
+  }
+
   100% {
-    transform: translateY(260%);
+    transform: translateY(1.25rem);
     opacity: 0;
   }
 }
@@ -633,6 +644,47 @@ input[type="range"] {
   font-weight: 700;
 }
 
+/* Right and wrong, carried by colour and a mark rather than by a paragraph
+   the reader has to decode. Both stay legible against the dark panel. */
+.option.is-correct {
+  border-color: #3fbf7f;
+  background: rgb(63 191 127 / 14%);
+}
+
+.option.is-wrong {
+  border-color: #d2604f;
+  background: rgb(210 96 79 / 14%);
+}
+
+.option.is-correct .option__key,
+.option.is-wrong .option__key {
+  font-size: 0;
+}
+
+.option.is-correct .option__key::after,
+.option.is-wrong .option__key::after {
+  font-size: var(--step-1);
+  line-height: 1;
+}
+
+.option.is-correct .option__key::after {
+  content: "✓";
+  color: #6fe0a6;
+}
+
+.option.is-wrong .option__key::after {
+  content: "✗";
+  color: #ef9382;
+}
+
+.verdict.is-correct {
+  border-color: #3fbf7f;
+}
+
+.verdict.is-wrong {
+  border-color: #d2604f;
+}
+
 .verdict {
   margin-top: var(--space-m);
   padding: var(--space-s) var(--space-m);
@@ -818,6 +870,24 @@ input[type="range"] {
   border-radius: var(--radius);
   background: #06090f;
   overflow: hidden;
+}
+
+/* A scale to read the change against. Without it the marks move and there is
+   nothing to judge the movement by. */
+.zoom__grid {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.zoom__gridline {
+  width: 1px;
+  background: rgb(122 134 170 / 22%);
+}
+
+.zoom__gridline:nth-child(3) {
+  background: rgb(122 134 170 / 40%);
 }
 
 .zoom__mark {

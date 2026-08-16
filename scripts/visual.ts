@@ -166,6 +166,26 @@ for (const viewport of VIEWPORTS) {
     }
   }
 
+  // Is every affordance big enough to notice? A scroll cue that rendered at
+  // 1.0x48.0 was technically present and read as nothing — the hairline
+  // failure the design rules already forbid, with no sensor enforcing them.
+  const faint = await page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>("[data-affordance]")]
+      .map((el) => {
+        const box = el.getBoundingClientRect();
+        return { id: el.className, w: box.width, h: box.height };
+      })
+      .filter((a) => a.w < 16 || a.h < 16),
+  );
+  if (faint.length === 0) {
+    console.log("  affordances: all large enough to notice");
+  } else {
+    violationCount += faint.length;
+    for (const a of faint) {
+      console.log(`  AFFORDANCE TOO SMALL: .${a.id} is ${a.w.toFixed(1)}x${a.h.toFixed(1)}`);
+    }
+  }
+
   // Is every label big enough to read? SVG text scales with its viewBox, so
   // its computed font-size is not the size anyone actually sees.
   const tiny = await page.evaluate((floor) => {
