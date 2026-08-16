@@ -329,19 +329,23 @@ function describePair(rEmit: number, rRecv: number, nm: number): string {
 }
 
 // --- Simulation 3: objects that actually exist ------------------------------
+//
+// Pure HTML and CSS, no SVG: every label scales with the type system instead
+// of with a viewBox, which is what made the previous version illegible at
+// 390px. The control is the magnification, so the section's question — how far
+// do you have to zoom before you can see this — is the thing you operate.
 
-const STRIP_WIDTH = 360;
+/** The full visible band, in nm. Magnification 1 shows exactly this much. */
+const BAND_NM = VISIBLE_MAX_NM - VISIBLE_MIN_NM;
 
-/** Earth needs roughly 10^9 magnification; that sets the scale's far end. */
-const MAX_LOG_MAGNIFICATION = 9;
-
-function clamp01(v: number): number {
-  return Math.min(Math.max(v, 0), 1);
-}
+/** Where the observed mark should land when a body is chosen: most of the way
+ *  across the lane, so the separation is unmistakable. */
+const TARGET_FRACTION = 0.85;
 
 function wireBodies(doc: Document): void {
   const picks = [...doc.querySelectorAll<HTMLButtonElement>(".body-pick")];
-  if (picks.length === 0) return;
+  const zoom = doc.querySelector<HTMLInputElement>("#zoom");
+  if (picks.length === 0 || !zoom) return;
 
   const name = doc.querySelector<HTMLElement>("#body-name");
   const blurb = doc.querySelector<HTMLElement>("#body-blurb");
@@ -349,15 +353,63 @@ function wireBodies(doc: Document): void {
   const outNm = doc.querySelector<HTMLElement>("#body-nm");
   const outX = doc.querySelector<HTMLElement>("#body-x");
   const note = doc.querySelector<HTMLElement>("#body-note");
-  const observedLine = doc.querySelector<SVGLineElement>("#line-observed");
-  const meter = doc.querySelector<SVGRectElement>("#zoom-meter");
-  const windowLeft = doc.querySelector<SVGTextElement>("#window-left");
-  const windowRight = doc.querySelector<SVGTextElement>("#window-right");
-  const windowNote = doc.querySelector<SVGTextElement>("#window-note");
+  const observedMark = doc.querySelector<HTMLElement>("#mark-observed");
+  const observedFlag = doc.querySelector<HTMLElement>("#mark-observed-flag");
+  const bracket = doc.querySelector<HTMLElement>("#band-window");
+  const windowLeft = doc.querySelector<HTMLElement>("#window-left");
+  const windowRight = doc.querySelector<HTMLElement>("#window-right");
+  const windowNote = doc.querySelector<HTMLElement>("#window-note");
 
-  const select = (id: string) => {
+  let current = BODIES[0];
+
+  const draw = () => {
+    const magnification = 10 ** Number(zoom.value);
+    const span = BAND_NM / magnification;
+    const x = compactnessOf(current.massKg, current.radiusM);
+    const z = compactnessToRedshift(x);
+    const nm = observedWavelength(EMITTED_NM, z);
+    const delta = nm - EMITTED_NM;
+
+    // The lane is a window `span` wide centred on the emitted wavelength.
+    const fraction = 0.5 + delta / span;
+    const offscale = fraction > 1;
+
+    if (observedMark) {
+      observedMark.classList.toggle("is-offscale", offscale);
+      if (!offscale) observedMark.style.left = `${(fraction * 100).toFixed(3)}%`;
+      else observedMark.style.removeProperty("left");
+      const colour = isVisible(nm) ? wavelengthToCss(nm) : BEYOND_VISIBLE;
+      observedMark.style.background = colour;
+      observedMark.style.color = colour;
+    }
+    if (observedFlag) {
+      observedFlag.textContent = offscale
+        ? "observed — off this scale"
+        : `observed · ${trimNm(nm)} nm`;
+    }
+
+    // The bracket shows that window's true width on the whole spectrum: a
+    // hairline at high magnification, a real slice at low.
+    if (bracket) {
+      const widthPercent = Math.min((span / BAND_NM) * 100, 100);
+      bracket.style.width = `${Math.max(widthPercent, 0.4).toFixed(3)}%`;
+      bracket.style.left = `${(((EMITTED_NM - span / 2 - VISIBLE_MIN_NM) / BAND_NM) * 100).toFixed(3)}%`;
+    }
+
+    if (windowLeft) windowLeft.textContent = `${trimNm(EMITTED_NM - span / 2)} nm`;
+    if (windowRight) windowRight.textContent = `${trimNm(EMITTED_NM + span / 2)} nm`;
+    if (windowNote) {
+      windowNote.textContent =
+        magnification < 1.5
+          ? "no magnification — this shift is visible on its own"
+          : `magnified ${formatScientific(magnification)}× · window ${formatScientific(span)} nm wide`;
+    }
+  };
+
+  const select = (id: string, animate: boolean) => {
     const body = BODIES.find((b) => b.id === id);
     if (!body) return;
+    current = body;
 
     for (const pick of picks) {
       pick.setAttribute("aria-pressed", String(pick.dataset.body === id));
@@ -366,33 +418,6 @@ function wireBodies(doc: Document): void {
     const x = compactnessOf(body.massKg, body.radiusM);
     const z = compactnessToRedshift(x);
     const nm = observedWavelength(EMITTED_NM, z);
-    const delta = nm - EMITTED_NM;
-
-    // Zoom in until the shift is visible. How far you had to zoom is the
-    // point of the section, so it is stated rather than hidden.
-    const span = Math.max(delta * 2.5, 1e-9);
-    const windowStart = EMITTED_NM - span * 0.2;
-    const magnification = (VISIBLE_MAX_NM - VISIBLE_MIN_NM) / span;
-
-    observedLine?.setAttribute("fill", isVisible(nm) ? wavelengthToCss(nm) : BEYOND_VISIBLE);
-
-    // How close this shift is to being visible unaided, on a log scale. A
-    // linear window on the visible band cannot do this job: the four objects
-    // span nine orders of magnitude, so Earth and Sirius B both collapse onto
-    // the same sub-pixel sliver and the picture stops distinguishing them.
-    if (meter) {
-      const closeness = clamp01(1 - Math.log10(Math.max(magnification, 1)) / MAX_LOG_MAGNIFICATION);
-      meter.setAttribute("width", Math.max(closeness * STRIP_WIDTH, 2).toFixed(1));
-    }
-
-    if (windowLeft) windowLeft.textContent = `${trimNm(windowStart)} nm`;
-    if (windowRight) windowRight.textContent = `${trimNm(windowStart + span)} nm`;
-    if (windowNote) {
-      windowNote.textContent =
-        magnification < 2
-          ? "no magnification needed — this shift is visible on its own"
-          : `magnified ${formatScientific(magnification)}× to make the shift visible`;
-    }
 
     if (name) name.textContent = body.name;
     if (blurb) blurb.textContent = body.blurb;
@@ -403,15 +428,67 @@ function wireBodies(doc: Document): void {
     if (outNm) outNm.textContent = `${trimNm(nm)} nm`;
     if (outX) outX.textContent = formatScientific(x);
     if (note) note.textContent = describeBody(z);
+
+    // Everything about the body itself lands immediately; only the zoom level
+    // travels. Making the readouts wait on an animation would be a lag, and
+    // would leave the observable state wrong for the duration.
+    draw();
+
+    // Zoom to where this body's shift becomes visible. Travelling there rather
+    // than jumping is the demonstration: you watch how deep you have to go.
+    const target = idealExponent(nm - EMITTED_NM);
+    if (animate) travelTo(doc, zoom, target, draw);
+    else {
+      zoom.value = String(target);
+      draw();
+    }
   };
 
+  zoom.addEventListener("input", draw);
   for (const pick of picks) {
-    pick.addEventListener("click", () => select(pick.dataset.body ?? ""));
+    pick.addEventListener("click", () => select(pick.dataset.body ?? "", true));
   }
 
   select(
     picks.find((p) => p.getAttribute("aria-pressed") === "true")?.dataset.body ?? BODIES[0].id,
+    false,
   );
+}
+
+/** The magnification exponent at which a shift of `delta` nm lands at
+ *  TARGET_FRACTION across the lane. */
+export function idealExponent(delta: number): number {
+  if (delta <= 0) return 0;
+  const magnification = BAND_NM * (TARGET_FRACTION - 0.5) / delta;
+  return Math.min(Math.max(Math.log10(magnification), 0), 9);
+}
+
+/** Ease a range input to a value, redrawing as it goes. */
+function travelTo(
+  doc: Document,
+  input: HTMLInputElement,
+  target: number,
+  onFrame: () => void,
+): void {
+  const view = doc.defaultView;
+  const from = Number(input.value);
+  if (!view || prefersReducedMotion(doc) || Math.abs(target - from) < 0.01) {
+    input.value = String(target);
+    onFrame();
+    return;
+  }
+
+  const duration = 900;
+  let started = 0;
+  const step = (now: number) => {
+    if (!started) started = now;
+    const t = Math.min((now - started) / duration, 1);
+    const eased = 1 - (1 - t) ** 3;
+    input.value = String(from + (target - from) * eased);
+    onFrame();
+    if (t < 1) view.requestAnimationFrame(step);
+  };
+  view.requestAnimationFrame(step);
 }
 
 function describeBody(z: number): string {

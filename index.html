@@ -292,6 +292,8 @@
 
         <div class="section__inner experiment">
           <div class="experiment__stage">
+            <figure class="well-figure">
+              <span class="well-figure__horizon">horizon</span>
             <svg
               class="well"
               viewBox="0 0 400 210"
@@ -323,7 +325,6 @@
               <rect x="0" y="0" width="190" height="210" fill="url(#wellShade)" />
               <rect x="0" y="0" width="40" height="210" fill="#0a0f1e" />
               <line x1="40" y1="0" x2="40" y2="210" stroke="#46528a" stroke-dasharray="4 4" />
-              <text x="6" y="18" font-size="10" fill="#8593bd">horizon</text>
 
               <!-- The beam. Thick on purpose: this is where the physics lives,
                    so it gets area, not a hairline. -->
@@ -339,31 +340,24 @@
               />
 
               <line x1="40" y1="160" x2="370" y2="160" stroke="#2a3557" />
-              <g font-size="10" fill="#6b78a3" text-anchor="middle">
-                <text x="70" y="178">2×</text>
-                <text x="130" y="178">4×</text>
-                <text x="250" y="178">8×</text>
-                <text x="370" y="178">12×</text>
-              </g>
-              <text x="205" y="199" font-size="10" fill="#6b78a3" text-anchor="middle">
-                distance from the mass, in horizon radii
-              </text>
 
               <g id="observer-emit" transform="translate(70 91)">
                 <circle r="13" fill="#e9eefb" opacity="0.18" />
                 <circle r="7" fill="#ffffff" />
-                <text y="-22" text-anchor="middle" font-size="10" fill="#e8ecf7">
-                  emitted here
-                </text>
               </g>
               <g id="observer-recv" transform="translate(370 91)">
                 <circle r="13" fill="#e9eefb" opacity="0.18" />
                 <circle r="7" fill="#ffffff" />
-                <text y="-22" text-anchor="middle" font-size="10" fill="#e8ecf7">
-                  received here
-                </text>
               </g>
             </svg>
+              <div class="well-figure__axis" aria-hidden="true">
+                <span>2×</span><span>4×</span><span>8×</span><span>12×</span>
+              </div>
+              <figcaption class="well-figure__caption">
+                Distance from the mass, in horizon radii. The bar is the light;
+                its colour is what the light is at each point of the journey.
+              </figcaption>
+            </figure>
           </div>
 
           <div class="experiment__panel">
@@ -408,9 +402,9 @@
           <h2>How big is this effect, actually?</h2>
           <p class="lede">
             Everything above used a slider that runs all the way to a black
-            hole. Here is the same formula against things that exist — and the
-            answer is that you usually have to magnify enormously to see it at
-            all.
+            hole. Here is the same formula against things that exist. Pick one
+            and watch how far you have to zoom in before the shift is visible
+            at all.
           </p>
         </div>
 
@@ -430,126 +424,49 @@
             </button>
           </div>
 
-          <div class="body-stage" aria-live="polite">
-            <!-- A spectral-line view. The window narrows until the shift is
-                 visible, and the magnification needed is the punchline. -->
-            <svg
-              class="body-stage__svg"
-              viewBox="0 0 400 142"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <defs>
-                <filter id="lineBloom" x="-200%" y="-40%" width="500%" height="180%">
-                  <feGaussianBlur stdDeviation="3" result="b" />
-                  <feMerge>
-                    <feMergeNode in="b" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-                <linearGradient id="bandStrip" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stop-color="rgb(77 0 77)" />
-                  <stop offset="12.5%" stop-color="rgb(43 0 255)" />
-                  <stop offset="25%" stop-color="rgb(0 204 255)" />
-                  <stop offset="37.5%" stop-color="rgb(73 255 0)" />
-                  <stop offset="50%" stop-color="rgb(255 255 0)" />
-                  <stop offset="62.5%" stop-color="rgb(255 59 0)" />
-                  <stop offset="75%" stop-color="rgb(255 0 0)" />
-                  <stop offset="100%" stop-color="rgb(77 0 0)" />
-                </linearGradient>
-              </defs>
+          <div class="body-stage">
+            <!-- No SVG here at all. Every label is HTML, so it scales with the
+                 type system instead of with a viewBox. -->
+            <figure class="zoom">
+              <div class="zoom__band">
+                <div class="zoom__bracket" id="band-window" data-mark></div>
+              </div>
+              <figcaption class="zoom__caption">
+                The whole visible spectrum. The bracket marks the slice you are
+                looking at below.
+              </figcaption>
 
-              <!-- The whole visible band, with the zoom window marked on it.
-                   This is the depiction: the window is invisibly thin for
-                   Earth and a third of the band for a neutron star. -->
-              <rect
-                x="20"
-                y="4"
-                width="360"
-                height="9"
-                rx="2"
-                fill="url(#bandStrip)"
-                opacity="0.75"
+              <div class="zoom__lane">
+                <div class="zoom__mark zoom__mark--emitted" id="mark-emitted">
+                  <span class="zoom__flag">emitted · 500 nm</span>
+                </div>
+                <div class="zoom__mark zoom__mark--observed" id="mark-observed" data-mark>
+                  <span class="zoom__flag" id="mark-observed-flag">observed</span>
+                </div>
+              </div>
+
+              <div class="zoom__scale">
+                <span id="window-left">499.9 nm</span>
+                <span id="window-right">500.3 nm</span>
+              </div>
+            </figure>
+
+            <div class="control">
+              <label class="control__label" for="zoom">Magnification</label>
+              <input
+                id="zoom"
+                data-sim-control
+                type="range"
+                min="0"
+                max="9"
+                step="0.05"
+                value="3"
+                aria-describedby="window-note"
               />
-              <rect
-                x="126"
-                y="2"
-                width="4"
-                height="13"
-                fill="none"
-                stroke="#ffffff"
-                stroke-width="1.2"
-              />
-              <text x="140" y="12" font-size="8" fill="#8f9ec4">500 nm sits here</text>
-
-              <rect x="20" y="26" width="360" height="52" rx="6" fill="#080c18" stroke="#1f2942" />
-
-              <line
-                id="line-emitted"
-                x1="140"
-                y1="26"
-                x2="140"
-                y2="78"
-                stroke="#8f9ec4"
-                stroke-width="2"
-                stroke-dasharray="4 3"
-              />
-              <!-- A rect, not a line. A vertical <line> has a zero-width
-                   bounding box, and an SVG filter defaults to
-                   objectBoundingBox units, so the filter region collapsed to
-                   nothing and this mark never rendered — with every attribute
-                   on it correct. A rect has area, so both the filter and the
-                   geometry sensor have something to work with. -->
-              <rect
-                id="line-observed" data-mark
-                x="258"
-                y="26"
-                width="4"
-                height="52"
-                fill="rgb(0 255 145)"
-                filter="url(#lineBloom)"
-              />
-
-              <text id="label-emitted" x="140" y="18" font-size="9" fill="#8f9ec4" text-anchor="middle">
-                emitted
-              </text>
-              <text id="label-observed" x="260" y="18" font-size="9" fill="#e8ecf7" text-anchor="middle">
-                observed
-              </text>
-
-              <text id="window-left" x="20" y="94" font-size="9" fill="#6b78a3">499.9 nm</text>
-              <text id="window-right" x="380" y="94" font-size="9" fill="#6b78a3" text-anchor="end">
-                500.3 nm
-              </text>
-              <text
-                id="window-note"
-                x="200"
-                y="104"
-                font-size="10"
-                fill="#99a5c4"
-                text-anchor="middle"
-              >
-                magnified 1000× to make the shift visible
-              </text>
-
-              <!-- How close this shift is to being visible without help. Log
-                   scaled, because the four objects span nine orders of
-                   magnitude and a linear bar cannot separate the small ones. -->
-              <rect x="20" y="114" width="360" height="7" rx="3.5" fill="#141a2e" />
-              <rect
-                id="zoom-meter" data-mark
-                x="20"
-                y="114"
-                width="122"
-                height="7"
-                rx="3.5"
-                fill="var(--accent, #e2703a)"
-              />
-              <text x="20" y="132" font-size="8" fill="#6b78a3">needs a spectrograph</text>
-              <text x="380" y="132" font-size="8" fill="#6b78a3" text-anchor="end">
-                visible on its own
-              </text>
-            </svg>
+              <p class="control__hint" id="window-note">
+                magnified 1000× — the shift is just visible
+              </p>
+            </div>
 
             <div>
               <h3 class="body-card__name" id="body-name">Sirius B</h3>
@@ -571,7 +488,7 @@
               </div>
               <div>
                 <dt>Compactness 2GM/Rc²</dt>
-                <dd id="body-x">5.18 × 10⁻⁴</dd>
+                <dd id="body-x">5.19 × 10⁻⁴</dd>
               </div>
             </dl>
 

@@ -689,9 +689,168 @@ input[type="range"] {
   gap: var(--space-m);
 }
 
-.body-stage__svg {
+/* Simulation 3 is pure HTML and CSS. There is no SVG in it at all, which is
+   what makes every label scale with the type system rather than with a
+   viewBox — the bug class, designed out rather than detected. */
+
+.zoom {
+  margin: 0;
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.zoom__band {
+  position: relative;
+  height: 1rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(
+    to right,
+    rgb(77 0 77) 0%,
+    rgb(43 0 255) 12.5%,
+    rgb(0 204 255) 25%,
+    rgb(73 255 0) 37.5%,
+    rgb(255 255 0) 50%,
+    rgb(255 59 0) 62.5%,
+    rgb(255 0 0) 75%,
+    rgb(77 0 0) 100%
+  );
+  opacity: 0.8;
+}
+
+.zoom__bracket {
+  position: absolute;
+  inset-block: -4px;
+  left: 30%;
+  width: 3px;
+  min-width: 2px;
+  border: 2px solid #fff;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 60%);
+  transition:
+    left var(--dur) var(--ease),
+    width var(--dur) var(--ease);
+}
+
+.zoom__caption,
+.zoom__scale {
+  font-size: var(--step-sm);
+  color: var(--on-space-dim);
+}
+
+.zoom__scale {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+}
+
+.zoom__lane {
+  position: relative;
+  height: 6.5rem;
+  margin-top: var(--space-s);
+  border: 1px solid var(--space-line);
+  border-radius: var(--radius);
+  background: #06090f;
+  overflow: hidden;
+}
+
+.zoom__mark {
+  position: absolute;
+  inset-block: 1.6rem 0;
+  width: 3px;
+  transition: left var(--dur) var(--ease);
+}
+
+.zoom__mark--emitted {
+  left: 50%;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--on-space-dim) 0 5px,
+    transparent 5px 10px
+  );
+}
+
+.zoom__mark--observed {
+  left: 50%;
+  background: rgb(0 255 145);
+  box-shadow: 0 0 12px 2px currentcolor;
+}
+
+.zoom__flag {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  translate: -50% 0;
+  white-space: nowrap;
+  font-size: var(--step-sm);
+  color: var(--on-space);
+  background: rgb(6 9 15 / 85%);
+  padding: 0 var(--space-3xs);
+  border-radius: var(--space-3xs);
+}
+
+.zoom__mark--emitted .zoom__flag {
+  color: var(--on-space-dim);
+}
+
+/* When the shift runs off the end of the window, say so rather than hiding
+   the mark somewhere the reader cannot see it. */
+.zoom__mark.is-offscale {
+  left: calc(100% - 3px);
+  opacity: 0.5;
+}
+
+.meter {
+  height: 7px;
+  border-radius: 3.5px;
+  background: #141a2e;
+  overflow: hidden;
+}
+
+.meter__fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3.5px;
+  transition: width var(--dur) var(--ease);
+}
+
+.meter__ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--step-sm);
+  color: var(--on-space-dim);
+}
+
+/* Simulation 2's labels, likewise out of the SVG. */
+
+.well-figure {
+  margin: 0;
+  position: relative;
   width: 100%;
-  height: auto;
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.well-figure__horizon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: var(--step-sm);
+  color: var(--on-space-dim);
+  z-index: 1;
+}
+
+.well-figure__axis {
+  display: flex;
+  justify-content: space-between;
+  padding-left: 10%;
+  font-size: var(--step-sm);
+  color: var(--on-space-dim);
+  font-family: var(--font-mono);
+}
+
+.well-figure__caption {
+  font-size: var(--step-sm);
+  color: var(--on-space-dim);
 }
 
 .body-card__name {

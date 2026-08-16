@@ -18,7 +18,7 @@
 import { readFileSync, mkdirSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, join, resolve } from "node:path";
-import { chromium, type Page } from "playwright";
+import { chromium } from "playwright";
 
 const DIST = resolve("dist");
 const OUT = resolve("screenshots");

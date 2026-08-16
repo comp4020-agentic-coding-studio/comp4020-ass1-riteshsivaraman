@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { JSDOM } from "jsdom";
 import { beforeEach, describe, expect, it } from "vitest";
-import { init } from "../app";
+import { idealExponent, init } from "../app";
+import { BODIES, compactnessOf, compactnessToRedshift } from "../redshift";
 
 // Simulations 2 and 3, against the built page. Same rule as the core: a new
 // interaction lands with its sensor, so a later change cannot quietly break
@@ -209,34 +210,36 @@ describe("real objects", () => {
     expect(text).not.toMatch(/0\.0000/);
   });
 
-  it("moves the zoom meter toward naked-eye visibility as the shift grows", () => {
-    // This is the section's actual depiction: a hairline window for Earth, a
-    // real slice of the spectrum for a neutron star. If the window stopped
-    // changing, the section would be a table again.
-    const width = () => Number(doc.querySelector("#zoom-meter")!.getAttribute("width"));
-    click('[data-body="earth"]');
-    const earth = width();
-    click('[data-body="sirius-b"]');
-    const sirius = width();
-    click('[data-body="neutron-star"]');
-    expect(sirius).toBeGreaterThan(earth);
-    expect(width()).toBeGreaterThan(sirius);
+  it("needs deeper magnification the smaller the shift", () => {
+    // A pure function, so it is asserted without racing the zoom animation.
+    // Ordering is the claim: Earth's shift needs the most zoom, a neutron
+    // star's the least.
+    const need = (id: string) => {
+      const b = BODIES.find((x) => x.id === id)!;
+      return idealExponent(500 * compactnessToRedshift(compactnessOf(b.massKg, b.radiusM)));
+    };
+    expect(need("earth")).toBeGreaterThan(need("sun"));
+    expect(need("sun")).toBeGreaterThan(need("sirius-b"));
+    expect(need("sirius-b")).toBeGreaterThan(need("neutron-star"));
+    expect(need("neutron-star")).toBeLessThan(1);
   });
 
   it("colours the observed mark by the wavelength that arrives", () => {
-    const fill = () => doc.querySelector("#line-observed")!.getAttribute("fill");
+    // The body's own readouts land synchronously; only the zoom level travels.
+    const colour = () => doc.querySelector<HTMLElement>("#mark-observed")!.style.background;
     click('[data-body="earth"]');
-    const earth = fill();
+    const earth = colour();
     click('[data-body="neutron-star"]');
-    expect(fill()).not.toBe(earth);
     expect(earth).toBeTruthy();
+    expect(colour()).not.toBe(earth);
   });
 
-  it("states the magnification, and drops it when none is needed", () => {
-    click('[data-body="earth"]');
-    expect(doc.querySelector("#window-note")!.textContent).toMatch(/magnified/);
-    click('[data-body="neutron-star"]');
-    expect(doc.querySelector("#window-note")!.textContent).toMatch(/no magnification/);
+  it("states the magnification, and drops the claim at 1x", () => {
+    const note = () => doc.querySelector("#window-note")!.textContent!;
+    setRange("#zoom", 4);
+    expect(note()).toMatch(/magnified/);
+    setRange("#zoom", 0);
+    expect(note()).toMatch(/no magnification/);
   });
 
   it("shows Earth's shift in the digits instead of rounding it away", () => {
