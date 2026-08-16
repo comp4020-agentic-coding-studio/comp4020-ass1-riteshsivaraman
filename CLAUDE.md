@@ -225,6 +225,56 @@ Two rules about growing this table:
 *broke*; it cannot tell me whether the design is *good*. Those are different
 questions and only one of them is a machine's.
 
+## The defect loop
+
+Every bug report is **two** bugs: the defect, and the reason the harness let it
+through. Fixing only the first means fixing instances forever. This is the
+procedure, and it is not optional under time pressure — it is *cheapest* under
+time pressure, because the sensor keeps working while attention moves on.
+
+1. **Reproduce by measurement, not by reading code.** Get a number out of the
+   running artefact — a bounding box, a computed font size, a filmstrip frame.
+   A root cause you have not measured is a guess, and guesses produce fixes
+   that change something adjacent to the problem. "`#line-observed` renders
+   0.0 × 143.3" is a diagnosis; "the filter looks wrong" is not.
+2. **Name what the defect is an instance of.** Not "the observed line is
+   invisible" but "an element can be attribute-correct and render nothing."
+   The class is what the sensor will target; the instance is just the example
+   that found it.
+3. **Say why no sensor caught it**, in one of three shapes:
+   - *No sensor exists* for this property → build one.
+   - *A sensor exists but its coverage is partial* → widen it, and make the
+     coverage **derived rather than hand-maintained**. Simulation 3 went
+     unfilmed for a whole pass because the filmstrip list was three lines I
+     had to remember to update. Lists you maintain by hand are a defect
+     waiting for its turn.
+   - *A sensor exists but measures the wrong thing* → an attribute assertion
+     standing in for a rendering question is the standard version of this.
+4. **Add the sensor first and watch it go red** on the known defect. A sensor
+   written after the fix only confirms what you already decided. This step is
+   the whole difference between a habit and a system.
+5. **Then fix it,** and watch the sensor go green.
+6. **Prefer designing the class out over detecting it.** Moving labels from
+   SVG to HTML makes illegible-at-390px unreachable; the size sensor becomes a
+   guard rather than the defence. Detection is the fallback when the class
+   cannot be designed away.
+
+### Who finds what
+
+Worth being honest about the division of labour, because it has held for every
+defect in this build:
+
+- **The harness finds what a human cannot perceive**: contrast ratios, a 3.5e-7
+  nm rounding error, a hairline that renders at 0px, text at 5.8px.
+- **The human finds what no sensor was pointed at**: that the page felt dead,
+  that a simulation was too simple, that colour changes were not obvious, that
+  the star clashes with the text.
+
+Neither found the other's bugs, in either direction. So a human report is
+always valid **as a symptom**, even when its diagnosis is wrong — and the
+correct response to one is never just to fix the symptom, it is to ask what
+the harness would need in order to have found it first.
+
 ## Backpressure: layers, and looking on purpose
 
 Build **horizontally across the whole page**, least complex to most complex ---
@@ -322,6 +372,17 @@ no spectacle. Concretely:
 - No pulsing that reads as brightness change, no lens flares, no starfield that
   reacts to the slider. Ambient motion is ambient; only the light responds to
   the physics.
+
+**Graphics in SVG, labels in HTML.** Never `<text>` inside a scaled viewBox.
+SVG text scales with the viewBox, so `font-size="8"` in a 400-unit box renders
+at 5.8px in a 342px phone container — illegible, and invisible to every check
+that reads computed font sizes. Labels live in HTML positioned around or over
+the graphic, where they scale with the type system. This makes the whole class
+of bug unreachable rather than merely detectable.
+
+**Anything that can overlap the star carries a scrim.** The reading panels do
+this already with a translucent background and a backdrop blur; ledes sitting
+directly over the star do not, and that is where the colour clashes.
 
 **Salience carries meaning.** If a visual property encodes physics, it has to
 be a *prominent* property — area, position, large-scale colour. Never a

@@ -28,23 +28,10 @@ const VIEWPORTS = [
   { name: "phone", width: 390, height: 844 },
 ] as const;
 
-/** Each simulation, and how to sweep it. `t` runs 0 → 1 across the frames. */
-const FILMSTRIPS = [
-  {
-    name: "sim1-gravity",
-    section: "#experiment",
-    drive: (t: number) => ({ "#compactness": String(0.95 * t) }),
-  },
-  {
-    name: "sim2-observers",
-    section: "#observers",
-    // Sweep the emitter from deep to shallow while the receiver stays out:
-    // redshift falls away to almost nothing.
-    drive: (t: number) => ({ "#r-emit": String(1.05 + t * 10.95) }),
-  },
-] as const;
-
 const FRAMES = 5;
+
+/** The floor for text a person is expected to read, at the phone viewport. */
+const MIN_LEGIBLE_PX = 11;
 
 const TYPES: Record<string, string> = {
   ".html": "text/html",
@@ -94,7 +81,19 @@ for (const viewport of VIEWPORTS) {
   console.log(`\n${viewport.name} (${viewport.width}x${viewport.height})`);
   console.log(`  page       → screenshots/index-${viewport.name}.png`);
 
-  for (const strip of FILMSTRIPS) {
+  // Every simulation gets filmed, enumerated from the page rather than from a
+  // list here. A hand-maintained list is how simulation 3 went unfilmed while
+  // its main mark was invisible and its zoom view never moved.
+  const sims = await page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>("[data-sim]")].map((section) => ({
+      name: section.dataset.sim!,
+      steps: section.querySelectorAll("[data-sim-step]").length,
+      hasControl: Boolean(section.querySelector("[data-sim-control]")),
+    })),
+  );
+
+  for (const sim of sims) {
+    const section = `[data-sim="${sim.name}"]`;
     const frames: string[] = [];
     const labels: string[] = [];
 
@@ -102,30 +101,96 @@ for (const viewport of VIEWPORTS) {
     // away from the self-demo through the same path a reader would — otherwise
     // the demo keeps animating and the filmstrip documents the demo rather
     // than the sweep it claims to be showing.
-    await page.locator(strip.section).scrollIntoViewIfNeeded();
-    await page.evaluate((selectors) => {
-      for (const selector of selectors) {
-        document
-          .querySelector(selector)
-          ?.dispatchEvent(new Event("pointerdown", { bubbles: true }));
-      }
-    }, Object.keys(strip.drive(0)));
+    await page.locator(section).scrollIntoViewIfNeeded();
+    await page.evaluate((sel) => {
+      document
+        .querySelector(`${sel} [data-sim-control]`)
+        ?.dispatchEvent(new Event("pointerdown", { bubbles: true }));
+    }, section);
     await page.waitForTimeout(700);
 
-    for (let i = 0; i < FRAMES; i++) {
-      const t = i / (FRAMES - 1);
-      await setControls(page, strip.drive(t));
+    const count = sim.hasControl ? FRAMES : sim.steps;
+    for (let i = 0; i < count; i++) {
+      const label = await page.evaluate(
+        ({ sel, index, total, sweep }) => {
+          if (sweep) {
+            const input = document.querySelector(
+              `${sel} [data-sim-control]`,
+            ) as HTMLInputElement;
+            const min = Number(input.min);
+            const max = Number(input.max);
+            const t = index / (total - 1);
+            input.value = String(min + (max - min) * t);
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            return `${input.id} = ${Number(input.value).toFixed(2)}`;
+          }
+          const step = [...document.querySelectorAll<HTMLElement>(`${sel} [data-sim-step]`)][
+            index
+          ];
+          step.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+          return step.textContent?.trim() ?? String(index);
+        },
+        { sel: section, index: i, total: count, sweep: sim.hasControl },
+      );
+
       // Let transitions settle, so a frame shows a state the page actually
       // rests on rather than one caught mid-ease.
       await page.waitForTimeout(450);
-      const shot = await page.locator(strip.section).screenshot();
-      frames.push(shot.toString("base64"));
-      labels.push(`${Math.round(t * 100)}%`);
+      frames.push((await page.locator(section).screenshot()).toString("base64"));
+      labels.push(label);
     }
 
-    const path = join(OUT, `film-${strip.name}-${viewport.name}.png`);
+    const path = join(OUT, `film-${sim.name}-${viewport.name}.png`);
     await composeFilmstrip(browser, frames, labels, path);
-    console.log(`  filmstrip  → screenshots/film-${strip.name}-${viewport.name}.png`);
+    console.log(`  filmstrip  → screenshots/film-${sim.name}-${viewport.name}.png`);
+  }
+
+  // Does every marked element actually occupy pixels? Attribute assertions
+  // cannot see this: an SVG filter on a zero-width bounding box yields an
+  // empty filter region and the element silently disappears while every
+  // attribute on it stays correct.
+  const invisible = await page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>("[data-mark]")]
+      .map((el) => {
+        const box = el.getBoundingClientRect();
+        return { id: el.id || el.className, w: box.width, h: box.height };
+      })
+      .filter((m) => m.w < 1 || m.h < 1),
+  );
+  if (invisible.length === 0) {
+    console.log("  marks: all rendered");
+  } else {
+    violationCount += invisible.length;
+    for (const m of invisible) {
+      console.log(`  MARK NOT RENDERED: #${m.id} is ${m.w.toFixed(1)}x${m.h.toFixed(1)}`);
+    }
+  }
+
+  // Is every label big enough to read? SVG text scales with its viewBox, so
+  // its computed font-size is not the size anyone actually sees.
+  const tiny = await page.evaluate((floor) => {
+    const found: { text: string; px: number }[] = [];
+    for (const el of document.querySelectorAll<Element>("text, p, span, dt, dd, figcaption, label")) {
+      const box = el.getBoundingClientRect();
+      if (box.width === 0 || !el.textContent?.trim()) continue;
+      let px = parseFloat(getComputedStyle(el).fontSize);
+      const svg = el.closest("svg");
+      if (svg) {
+        const vb = svg.viewBox.baseVal;
+        if (vb?.width) px *= svg.getBoundingClientRect().width / vb.width;
+      }
+      if (px < floor) found.push({ text: el.textContent.trim().slice(0, 40), px });
+    }
+    return found;
+  }, MIN_LEGIBLE_PX);
+  if (tiny.length === 0) {
+    console.log(`  text: nothing under ${MIN_LEGIBLE_PX}px`);
+  } else {
+    violationCount += tiny.length;
+    for (const t of tiny.slice(0, 6)) {
+      console.log(`  TEXT TOO SMALL (${t.px.toFixed(1)}px): "${t.text}"`);
+    }
+    if (tiny.length > 6) console.log(`  …and ${tiny.length - 6} more`);
   }
 
   await page.addScriptTag({ content: axe });
@@ -165,17 +230,6 @@ console.log(
     : `\n${violationCount} accessibility violation(s) above. Advisory, but read them.\n`,
 );
 
-/** Set one or more range inputs and let the page react, as a real drag would. */
-async function setControls(page: Page, values: Record<string, string>): Promise<void> {
-  await page.evaluate((pairs) => {
-    for (const [selector, value] of Object.entries(pairs)) {
-      const input = document.querySelector(selector) as HTMLInputElement | null;
-      if (!input) continue;
-      input.value = value;
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-    }
-  }, values);
-}
 
 /**
  * Tile frames into one image, by building a page of them and screenshotting

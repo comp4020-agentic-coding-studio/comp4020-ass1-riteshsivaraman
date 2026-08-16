@@ -122,7 +122,7 @@
       </section>
 
       <!-- 3. Simulation 1 — the core interaction ----------------------- -->
-      <section class="section reveal" id="experiment">
+      <section class="section reveal" id="experiment" data-sim="gravity">
         <div class="section__inner prose">
           <p class="eyebrow">Simulation 1 — the core</p>
           <h2>Turn gravity up</h2>
@@ -167,7 +167,7 @@
                 focusable="false"
               >
                 <path
-                  id="wave-observed"
+                  id="wave-observed" data-mark
                   d=""
                   fill="none"
                   stroke="rgb(0 255 145)"
@@ -189,6 +189,7 @@
               </label>
               <input
                 id="compactness"
+                data-sim-control
                 type="range"
                 min="0"
                 max="0.95"
@@ -203,7 +204,7 @@
 
             <div class="spectrum">
               <div class="spectrum__bar">
-                <div class="spectrum__marker" id="spectrum-marker"></div>
+                <div class="spectrum__marker" id="spectrum-marker" data-mark></div>
               </div>
               <div class="spectrum__scale visually-hidden">380nm to 780nm</div>
             </div>
@@ -278,7 +279,7 @@
       </section>
 
       <!-- 5. Simulation 2 — two positions in the same well -------------- -->
-      <section class="section reveal" id="observers">
+      <section class="section reveal" id="observers" data-sim="observers">
         <div class="section__inner prose">
           <p class="eyebrow">Simulation 2 — it's a relationship</p>
           <h2>Redshift isn't something a star has</h2>
@@ -327,7 +328,7 @@
               <!-- The beam. Thick on purpose: this is where the physics lives,
                    so it gets area, not a hairline. -->
               <rect
-                id="observer-beam"
+                id="observer-beam" data-mark
                 x="70"
                 y="78"
                 width="300"
@@ -368,7 +369,7 @@
           <div class="experiment__panel">
             <div class="control">
               <label class="control__label" for="r-emit">Light is emitted at</label>
-              <input id="r-emit" type="range" min="1.05" max="12" step="0.05" value="2" />
+              <input id="r-emit" data-sim-control type="range" min="1.05" max="12" step="0.05" value="2" />
               <p class="control__hint">
                 <span id="r-emit-value">2.00</span>× the horizon radius
               </p>
@@ -401,7 +402,7 @@
       </section>
 
       <!-- 6. Simulation 3 — real objects -------------------------------- -->
-      <section class="section reveal" id="real">
+      <section class="section reveal" id="real" data-sim="real">
         <div class="section__inner prose">
           <p class="eyebrow">Simulation 3 — the real numbers</p>
           <h2>How big is this effect, actually?</h2>
@@ -415,16 +416,16 @@
 
         <div class="section__inner">
           <div class="bodies" id="bodies" role="group" aria-label="Choose an object">
-            <button class="body-pick" type="button" data-body="earth" aria-pressed="false">
+            <button class="body-pick" data-sim-step type="button" data-body="earth" aria-pressed="false">
               Earth
             </button>
-            <button class="body-pick" type="button" data-body="sun" aria-pressed="false">
+            <button class="body-pick" data-sim-step type="button" data-body="sun" aria-pressed="false">
               The Sun
             </button>
-            <button class="body-pick" type="button" data-body="sirius-b" aria-pressed="true">
+            <button class="body-pick" data-sim-step type="button" data-body="sirius-b" aria-pressed="true">
               Sirius B
             </button>
-            <button class="body-pick" type="button" data-body="neutron-star" aria-pressed="false">
+            <button class="body-pick" data-sim-step type="button" data-body="neutron-star" aria-pressed="false">
               Neutron star
             </button>
           </div>
@@ -494,7 +495,7 @@
                 stroke-dasharray="4 3"
               />
               <line
-                id="line-observed"
+                id="line-observed" data-mark
                 x1="260"
                 y1="26"
                 x2="260"
@@ -531,7 +532,7 @@
                    magnitude and a linear bar cannot separate the small ones. -->
               <rect x="20" y="114" width="360" height="7" rx="3.5" fill="#141a2e" />
               <rect
-                id="zoom-meter"
+                id="zoom-meter" data-mark
                 x="20"
                 y="114"
                 width="122"
