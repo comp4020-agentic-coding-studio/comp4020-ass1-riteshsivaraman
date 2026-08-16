@@ -2,44 +2,37 @@
 
 ## What was the breakthrough that moved the work forward?
 
-The biggets breakthrough was Realising that a bug report is two bugs, and that I had been reporting one.
+Realising that I had stopped writing code and started writing the thing that
+writes code, and that this moves where my mistakes live.
 
-Partway through I had a page that passed every check and was completely
-lifeless. My instinct was to list what looked wrong and ask for it to be fixed.
-What actually moved the work was refusing to do that — asking instead why it had
-been *delivered* that way, before anything was touched.
+When I write a function badly, the bug sits in a line and something eventually
+trips over it. When I write a *rule* badly, the agent follows it faithfully,
+everywhere, immediately. The result is consistent, internally coherent and
+uniformly wrong — and nothing looks broken, because nothing disobeyed anything.
+That failure is far harder to see than a bad line of code, and I only caught it
+because I stopped asking for the page to be fixed and started asking why it had
+been built that way.
 
-Every sensor I owned measured a still frame. Screenshots are frozen instants,
-the accessibility scan reads a static DOM, the DOM tests assert values after the
-event has settled. Nothing could perceive motion, so the harness had quietly
-become the specification and the one quality nothing measured decayed to zero
-without a single check going red.
+What made this uncomfortable is that the harness was mine. Its blind spots were
+my blind spots, written down and automated. The green checks I had been
+collecting were never evidence the work was good; they were evidence it matched
+what I had thought to measure, which is a much smaller claim than it feels like
+at the time.
 
-That reframed every report after it. The defect is the cheap half; the expensive
-half is why the harness let it through. Adding the sensor *before* the fix and
-watching it go red is what separates a system from a habit — one written
-afterwards only confirms what you already decided.
-
-The sharpest version came last. Simulations auto-playing wasn't a slip: my own
-harness said a simulation should "demonstrate itself at rest", and that had been
-followed exactly. A rule can be the defect, and deleting the code without
-correcting the rule only lets it grow back.
+The deadline sharpened it rather than excusing it. With hours left, patching
+each symptom was clearly the faster move and I nearly took it. Changing the
+process instead felt like the wrong call while I was making it.
 
 ## What did this work change about who I want to be as a software developer?
 
-I want to be someone who spends the harness budget before the code budget, and
-who treats every complaint as evidence about the harness rather than about the
-code.
+I want to be suspicious of green.
 
-The instinct under a deadline is to build first and add checks if time remains.
-Doing it the other way made the night calmer rather than slower: every commit
-was green.
+Not dismissive of it — the checks caught real things I could never have seen by
+eye. But a passing suite only means the work satisfies the questions I
+remembered to ask. The habit I want is asking what I have pointed nothing at,
+because that is reliably the part I care most about and can least define.
 
-What I want to carry is narrower — knowing which questions belong to a machine
-and which belong to me. A test can tell me the redshift maths is
-right, the contrast passes, and no label renders under eleven pixels. It cannot
-tell me whether the page feels alive, or whether "you simply cannot see it any
-more" is the right sentence to put under the readout. Every defect I found was
-in that second category; every defect the harness found was in the first.
-Neither of us found the other's, once. Building the machine's half properly is
-how I get to spend attention on mine.
+The other thing I want to keep is the willingness to open the actual page,
+again and again, and say plainly what I see even when I cannot explain it.
+"This feels dead" was the most useful sentence I wrote during this assignment,
+and nothing I built could have produced it for me.
