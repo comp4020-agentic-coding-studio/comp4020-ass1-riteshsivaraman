@@ -166,6 +166,35 @@ for (const viewport of VIEWPORTS) {
     }
   }
 
+  // Is every label fully inside whatever clips it? Distinct from asking
+  // whether an element occupies pixels: a label can have a perfectly healthy
+  // bounding box and still be sliced in half by an ancestor's overflow.
+  const clipped = await page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>("[data-label]")]
+      .map((el) => {
+        let parent = el.parentElement;
+        while (parent && getComputedStyle(parent).overflow === "visible") {
+          parent = parent.parentElement;
+        }
+        if (!parent) return null;
+        const a = el.getBoundingClientRect();
+        const b = parent.getBoundingClientRect();
+        const over = Math.max(a.right - b.right, b.left - a.left, a.bottom - b.bottom, b.top - a.top);
+        return over > 1
+          ? { text: (el.textContent ?? "").trim().slice(0, 28), over, by: parent.id || parent.className }
+          : null;
+      })
+      .filter(Boolean),
+  );
+  if (clipped.length === 0) {
+    console.log("  labels: none clipped");
+  } else {
+    violationCount += clipped.length;
+    for (const c of clipped as { text: string; over: number; by: string }[]) {
+      console.log(`  LABEL CLIPPED by ${c.by}: "${c.text}" overhangs ${c.over.toFixed(1)}px`);
+    }
+  }
+
   // Is every affordance big enough to notice? A scroll cue that rendered at
   // 1.0x48.0 was technically present and read as nothing — the hairline
   // failure the design rules already forbid, with no sensor enforcing them.

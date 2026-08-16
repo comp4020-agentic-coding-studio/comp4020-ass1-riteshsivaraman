@@ -288,6 +288,35 @@ describe("simulation 3 has a scale to read against", () => {
   });
 });
 
+describe("the observed label stays whole at the edges", () => {
+  const mark = () => doc.querySelector<HTMLElement>("#mark-observed")!;
+
+  it("anchors the label to the end when the mark is near the right", () => {
+    // Centred on the mark, the label loses half its width over the edge and
+    // the lane's overflow slices it: 87.9px on desktop, 79.5px on phone.
+    // Earth's shift needs 10^8.6 before it separates from the emitted mark,
+    // and at that magnification it sits at 85% across.
+    click('[data-body="earth"]');
+    setRange("#zoom", 8.6);
+    expect(mark().className).toMatch(/is-at-end/);
+  });
+
+  it("keeps the label centred in the middle of the lane", () => {
+    // Zoomed all the way out, Earth's shift is indistinguishable from zero,
+    // so the mark sits on top of the emitted one in the middle.
+    click('[data-body="earth"]');
+    setRange("#zoom", 0);
+    expect(mark().className).not.toMatch(/is-at-end|is-at-start/);
+  });
+
+  it("treats an off-scale mark as being at the end", () => {
+    click('[data-body="neutron-star"]');
+    setRange("#zoom", 5);
+    expect(mark().className).toMatch(/is-offscale/);
+    expect(mark().className).toMatch(/is-at-end/);
+  });
+});
+
 describe("the gravity slider says how much gravity", () => {
   it("quantifies itself, like every other slider on the page", () => {
     // It was the only one without a number against it.
@@ -309,6 +338,33 @@ describe("the gravity slider says how much gravity", () => {
       );
       expect(pct).toBeLessThanOrEqual(1);
     }
+  });
+});
+
+describe("the two observers are named", () => {
+  it("labels both ends of the journey", () => {
+    // Lost when the labels moved out of the SVG in the rebuild: the markers
+    // kept their positions and lost their names.
+    expect(doc.querySelector("#tag-emit")!.textContent!.trim()).toBeTruthy();
+    expect(doc.querySelector("#tag-recv")!.textContent!.trim()).toBeTruthy();
+  });
+
+  it("moves each label with the marker it names", () => {
+    const at = (id: string) => doc.querySelector<HTMLElement>(id)!.style.left;
+    setRange("#r-emit", 2);
+    const near = at("#tag-emit");
+    setRange("#r-emit", 10);
+    expect(at("#tag-emit")).not.toBe(near);
+  });
+
+  it("keeps each label over its own marker", () => {
+    setRange("#r-emit", 3);
+    setRange("#r-recv", 11);
+    const pct = (id: string) => parseFloat(doc.querySelector<HTMLElement>(id)!.style.left);
+    const markerX = (id: string) =>
+      Number(doc.querySelector(id)!.getAttribute("transform")!.match(/translate\(([-\d.]+)/)![1]);
+    expect(pct("#tag-emit")).toBeCloseTo((markerX("#observer-emit") / 400) * 100, 1);
+    expect(pct("#tag-recv")).toBeCloseTo((markerX("#observer-recv") / 400) * 100, 1);
   });
 });
 

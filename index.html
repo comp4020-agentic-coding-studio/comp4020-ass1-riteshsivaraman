@@ -303,7 +303,10 @@
         <div class="section__inner experiment">
           <div class="experiment__stage">
             <figure class="well-figure">
+              <div class="well-figure__plot">
               <span class="well-figure__horizon">horizon</span>
+              <span class="well-figure__tag" id="tag-emit" data-label>emitted</span>
+              <span class="well-figure__tag" id="tag-recv" data-label>received</span>
             <svg
               class="well"
               viewBox="0 0 400 210"
@@ -360,6 +363,7 @@
                 <circle r="7" fill="#ffffff" />
               </g>
             </svg>
+              </div>
               <div class="well-figure__axis" aria-hidden="true">
                 <span>2×</span><span>4×</span><span>8×</span><span>12×</span>
               </div>
@@ -459,10 +463,10 @@
               <div class="zoom__lane" id="zoom-lane">
                 <div class="zoom__grid" id="zoom-grid" aria-hidden="true"></div>
                 <div class="zoom__mark zoom__mark--emitted" id="mark-emitted">
-                  <span class="zoom__flag">emitted · 500 nm</span>
+                  <span class="zoom__flag" data-label>emitted · 500 nm</span>
                 </div>
                 <div class="zoom__mark zoom__mark--observed" id="mark-observed" data-mark>
-                  <span class="zoom__flag" id="mark-observed-flag">observed</span>
+                  <span class="zoom__flag" id="mark-observed-flag" data-label>observed</span>
                 </div>
               </div>
 

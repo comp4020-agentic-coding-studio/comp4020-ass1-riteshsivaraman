@@ -293,6 +293,8 @@ function wireObservers(doc: Document): void {
   const to = doc.querySelector<SVGStopElement>("#beam-to");
   const emitMark = doc.querySelector<SVGGElement>("#observer-emit");
   const recvMark = doc.querySelector<SVGGElement>("#observer-recv");
+  const tagEmit = doc.querySelector<HTMLElement>("#tag-emit");
+  const tagRecv = doc.querySelector<HTMLElement>("#tag-recv");
   const emitValue = doc.querySelector<HTMLElement>("#r-emit-value");
   const recvValue = doc.querySelector<HTMLElement>("#r-recv-value");
   const outZ = doc.querySelector<HTMLElement>("#out-pair-z");
@@ -314,6 +316,11 @@ function wireObservers(doc: Document): void {
     const xRecv = xForRadius(rRecv);
     emitMark?.setAttribute("transform", `translate(${xEmit.toFixed(1)} 91)`);
     recvMark?.setAttribute("transform", `translate(${xRecv.toFixed(1)} 91)`);
+
+    // The HTML labels track the SVG markers. The viewBox is 400 wide and the
+    // svg fills its container, so a viewBox x maps straight to a percentage.
+    if (tagEmit) tagEmit.style.left = `${((xEmit / 400) * 100).toFixed(2)}%`;
+    if (tagRecv) tagRecv.style.left = `${((xRecv / 400) * 100).toFixed(2)}%`;
 
     // The beam gets area, not a hairline: this is where the physics lives.
     beam?.setAttribute("x", String(Math.min(xEmit, xRecv).toFixed(1)));
@@ -408,6 +415,12 @@ function wireBodies(doc: Document): void {
       observedMark.classList.toggle("is-offscale", offscale);
       if (!offscale) observedMark.style.left = `${(fraction * 100).toFixed(3)}%`;
       else observedMark.style.removeProperty("left");
+
+      // Anchor the label to whichever edge it is near, so the lane's overflow
+      // cannot slice it. Centred is only safe in the middle.
+      const position = offscale ? 1 : fraction;
+      observedMark.classList.toggle("is-at-end", position > 0.72);
+      observedMark.classList.toggle("is-at-start", position < 0.28);
       const colour = isVisible(nm) ? wavelengthToCss(nm) : BEYOND_VISIBLE;
       observedMark.style.background = colour;
       observedMark.style.color = colour;

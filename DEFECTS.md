@@ -159,3 +159,5 @@ Nothing outstanding. Add a row here to report something outside a session —
 | Sim 3 gridlines don't change with the scale | broken | Grid positioned by layout, not by data | gridline-position test; `ticks.ts` unit tests | `f17ceca` |
 | Animation restarts from the minimum | feel | Phase was the state, not position | `sweep.ts` unit tests | `f17ceca` |
 | Gravity slider has no quantifier | unclear | The only slider with no value shown | slider-quantifier tests | `f17ceca` |
+| Sim 3 observed label cut off at the end | broken | A label anchored to a moving mark can leave its clipping container | label-containment (`data-label`) | `HEAD` |
+| Sim 2 emitter/receiver unlabelled | broken | Regression: names lost when labels moved out of the SVG | label-presence + tracking tests | `HEAD` |

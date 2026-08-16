@@ -939,6 +939,20 @@ input[type="range"] {
   color: var(--on-space-dim);
 }
 
+/* A label centred on its mark loses half its width over the edge, and the
+   lane clips it. Near an edge the label anchors to that edge instead — it
+   still points at the mark, and it stays whole. */
+.zoom__mark.is-at-end .zoom__flag {
+  left: auto;
+  right: 0;
+  translate: 0;
+}
+
+.zoom__mark.is-at-start .zoom__flag {
+  left: 0;
+  translate: 0;
+}
+
 /* When the shift runs off the end of the window, say so rather than hiding
    the mark somewhere the reader cannot see it. */
 .zoom__mark.is-offscale {
@@ -975,6 +989,27 @@ input[type="range"] {
   width: 100%;
   display: grid;
   gap: var(--space-2xs);
+}
+
+.well-figure__plot {
+  position: relative;
+}
+
+/* The emitter and receiver were labelled inside the SVG, and lost their names
+   when the labels moved out of it. Same information, in HTML, tracking the
+   markers. */
+.well-figure__tag {
+  position: absolute;
+  top: 22%;
+  translate: -50% 0;
+  z-index: 1;
+  white-space: nowrap;
+  font-size: var(--step-sm);
+  color: var(--on-space);
+  background: rgb(5 7 15 / 80%);
+  padding: 0 var(--space-3xs);
+  border-radius: var(--space-3xs);
+  transition: left var(--dur) var(--ease);
 }
 
 .well-figure__horizon {
