@@ -137,7 +137,7 @@ Nothing outstanding. Add a row here to report something outside a session —
 
 | What I saw | Where | Viewport | Kind | Expected instead |
 | --- | --- | --- | --- | --- |
-| _(empty)_ | | | | |
+| *(empty)* | | | | |
 
 ## Log
 
