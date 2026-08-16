@@ -184,6 +184,30 @@ judgement --- until it proves itself.
 | `spec/spectrum.test.ts` | gated | Wavelength→colour is right *and* defined past the visible band, which is exactly where this page's interaction ends up. |
 | `spec/core-interaction.test.ts` | gated | The graded core interaction, asserted against built `dist/`: the slider exists, is labelled, and driving it to a higher value yields a longer `data-observed-nm` and a further-right spectrum marker. |
 | `pnpm check:visual` | **advisory** | Playwright screenshots at both marking viewports (1920×1080, 390×844) plus an axe-core scan. Mechanical catch for layout and contrast breaks. Not in `pnpm check`, not in CI. |
+| `pnpm check:visual` filmstrips | **advisory** | The same run captures each simulation at several instants *during* a change, tiled into one image. See "The stillness failure" below for why this exists. |
+
+### The stillness failure
+
+Every sensor above measured a still frame. Screenshots are frozen instants;
+axe scans a static DOM; the jsdom tests assert attribute values *after* an
+event has settled. Nothing in the roster could perceive motion, continuity, or
+what dragging something feels like.
+
+So the page came out correct, accessible, responsive — and lifeless. Not
+because anyone decided it should be, but because **the harness became the spec,
+and the quality nothing measured decayed to zero.** It took a human opening the
+live page to notice, after four rounds of checkpoints had reported green.
+
+Two lessons, both now rules:
+
+- **A sensor that can only see stills will produce a still page.** Checkpoints
+  for anything interactive hand over motion — a filmstrip, or the live URL —
+  never a screenshot of an interactive thing at rest.
+- **Watch for the qualities with no sensor.** Correctness, contrast and
+  viewport behaviour all had teeth here, so they held. Delight had none, so it
+  vanished silently. When something matters and can't be measured, that is
+  exactly when it needs a *named checkpoint question*, because it will not
+  announce its own absence.
 
 Two rules about growing this table:
 
@@ -221,10 +245,25 @@ batched round* --- the dev server URL, or a single set of screenshots covering
 the whole page as it stands --- before the next layer starts. Extra screenshots
 are reserved for a genuine ambiguity that code cannot resolve.
 
+The layers are: math → theme → layout → static content → interactivity →
+**motion and feel**. That last one is a named layer because the first time
+through it wasn't, and it fell straight into the crack between "static content"
+(explicitly still) and "interactivity" (which I read as wiring correctness —
+does the right number reach the right attribute). Anything that isn't somebody's
+named job doesn't get done.
+
 Layers 0 and 1 produce no page to look at (pure functions; CSS tokens with no
-markup consuming them), so they report as text. That leaves three checkpoints
-that are actually worth an interruption: **skeleton at both viewports**, **real
-content**, **wired interaction**.
+markup consuming them), so they report as text.
+
+**Every checkpoint asks two questions, and they are not the same question.**
+
+1. *Is it broken?* — `pnpm check`, `check:visual`, axe, keyboard. Machine
+   answerable. If this is all a checkpoint asks, the page will pass every check
+   and still be lifeless.
+2. *How does it feel?* — delivered as the **live URL** for anything
+   interactive, or a filmstrip for a specific motion. Not machine answerable,
+   and not answerable by me describing a screenshot either. It needs the user's
+   own eyes on the moving thing.
 
 Keyboard operability is checked at every checkpoint, not once at the end: tab
 to the slider, drive it with arrow keys, confirm the readouts move.
@@ -256,12 +295,47 @@ so the wiring and the sensor cannot drift apart:
 - `data-redshift-z` --- the redshift factor `z`
 - `data-spectrum-pos` --- marker position, 0–1 along the spectrum bar
 
-**Palette.** Deep navy/near-black for the space-side sections, warm off-white
-for the reading sections, charcoal text, one restrained warm accent. Spectrum
-colours are reserved for the spectrum bar and the star's glow --- they are the
-page's data, so nothing decorative is allowed to borrow them.
+**Palette.** Near-black throughout — the page never leaves space. Reading
+passages sit on slightly-raised dark panels, not full-bleed light sections.
+Everything structural is desaturated. Spectrum colours are reserved for the
+light itself: the star, the beam, the spectrum bar. They are the page's data,
+so nothing decorative borrows them, which means that when saturated colour
+appears anywhere it *means* something.
 
-**Motion.** Any ambient drift respects `prefers-reduced-motion`.
+**Motion is the default, not the exception.** Any value that changes moves
+continuously to its new state. An instant jump is the exception and needs a
+reason. Durations and easings are tokens, decided once like the palette, so
+they are not re-invented per component. `prefers-reduced-motion` gets a page
+that is genuinely still *and still good* — not a broken version of the moving
+one.
+
+**Drama must not imply physics that isn't there.** The page is set in space and
+should feel like it: one persistent star, parallax depth, bloom on the light,
+darkness everywhere else. But spectacle that tells a second story is worse than
+no spectacle. Concretely:
+
+- No beam that **fades** as it climbs. Redshift does not dim light — "the same
+  green, but dimmer" is the wrong answer the prediction quiz exists to correct,
+  and a fading beam would teach it. The beam holds its brightness and shifts
+  *hue* along its length, going dark only where it crosses out of the visible
+  band. That is a disappearance, not a fade, and it is true.
+- No pulsing that reads as brightness change, no lens flares, no starfield that
+  reacts to the slider. Ambient motion is ambient; only the light responds to
+  the physics.
+
+**Salience carries meaning.** If a visual property encodes physics, it has to
+be a *prominent* property — area, position, large-scale colour. Never a
+hairline. Simulation 2 originally encoded its entire result in the hue of a 3px
+line, which is why nobody could see that it was working.
+
+**What counts as a simulation.** Four conditions; something failing these is a
+diagram or a filtered table, not a simulation:
+
+1. It **depicts** the phenomenon rather than reporting numbers about it.
+2. It changes **continuously**, not in jumps.
+3. It is legible **at a glance at 390px**, not only after reading the labels.
+4. It has a **resting state that demonstrates itself** — it shows what it does
+   before the reader touches anything, rather than waiting to be discovered.
 
 **Scope discipline.** One idea, one mechanic. The slider experiment is *the*
 core interaction.
