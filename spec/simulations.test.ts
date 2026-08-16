@@ -117,6 +117,70 @@ describe("two observers", () => {
   });
 });
 
+describe("the beam depicts the shift, rather than reporting it", () => {
+  const stop = (id: string) => doc.querySelector(id)!.getAttribute("stop-color");
+
+  it("gives the beam real area, not a hairline", () => {
+    // The original version encoded the entire result in the hue of a 3px line
+    // and nobody could see it working. Meaning goes on prominent properties.
+    const height = Number(doc.querySelector("#observer-beam")!.getAttribute("height"));
+    expect(height).toBeGreaterThan(12);
+  });
+
+  it("runs green at the emitting end and shifted at the receiving end", () => {
+    setRange("#r-emit", 1.5);
+    setRange("#r-recv", 12);
+    expect(stop("#beam-from")).not.toBe(stop("#beam-to"));
+  });
+
+  it("reverses the gradient when the light travels inward", () => {
+    // The gradient follows the direction of travel, so the emitted colour is
+    // always at the emitting end regardless of which side that is.
+    setRange("#r-emit", 1.5);
+    setRange("#r-recv", 12);
+    const outwardStart = stop("#beam-from");
+    setRange("#r-emit", 12);
+    setRange("#r-recv", 1.5);
+    expect(stop("#beam-to")).toBe(outwardStart);
+  });
+
+  it("never fades the beam out", () => {
+    // Redshift does not dim light. A fading beam would teach the exact
+    // misconception option B of the prediction quiz exists to correct.
+    setRange("#r-emit", 1.05);
+    setRange("#r-recv", 12);
+    const beam = doc.querySelector("#observer-beam")!;
+    expect(beam.getAttribute("opacity")).toBeNull();
+    for (const id of ["#beam-from", "#beam-to"]) {
+      expect(doc.querySelector(id)!.getAttribute("stop-opacity")).toBeNull();
+    }
+  });
+
+  it("spans the gap between the two observers", () => {
+    setRange("#r-emit", 2);
+    setRange("#r-recv", 10);
+    const beam = doc.querySelector("#observer-beam")!;
+    const x = Number(beam.getAttribute("x"));
+    const width = Number(beam.getAttribute("width"));
+    const at = (id: string) =>
+      Number(doc.querySelector(id)!.getAttribute("transform")!.match(/translate\(([-\d.]+)/)![1]);
+    expect(x).toBeCloseTo(at("#observer-emit"), 0);
+    expect(x + width).toBeCloseTo(at("#observer-recv"), 0);
+  });
+});
+
+describe("reveals degrade safely", () => {
+  it("shows every section when there is no IntersectionObserver", () => {
+    // jsdom has none, which is exactly the fallback path. If this inverted,
+    // the whole page would ship invisible to anyone whose browser or settings
+    // took that path too.
+    const hidden = [...doc.querySelectorAll(".reveal")].filter(
+      (el) => !el.classList.contains("is-in"),
+    );
+    expect(hidden).toHaveLength(0);
+  });
+});
+
 describe("real objects", () => {
   it("starts with exactly one object selected", () => {
     const pressed = [...doc.querySelectorAll(".body-pick")].filter(
@@ -143,6 +207,34 @@ describe("real objects", () => {
     const text = doc.querySelector("#body-z")!.textContent!;
     expect(text).toMatch(/×\s?10/);
     expect(text).not.toMatch(/0\.0000/);
+  });
+
+  it("moves the zoom meter toward naked-eye visibility as the shift grows", () => {
+    // This is the section's actual depiction: a hairline window for Earth, a
+    // real slice of the spectrum for a neutron star. If the window stopped
+    // changing, the section would be a table again.
+    const width = () => Number(doc.querySelector("#zoom-meter")!.getAttribute("width"));
+    click('[data-body="earth"]');
+    const earth = width();
+    click('[data-body="sirius-b"]');
+    const sirius = width();
+    click('[data-body="neutron-star"]');
+    expect(sirius).toBeGreaterThan(earth);
+    expect(width()).toBeGreaterThan(sirius);
+  });
+
+  it("states the magnification, and drops it when none is needed", () => {
+    click('[data-body="earth"]');
+    expect(doc.querySelector("#window-note")!.textContent).toMatch(/magnified/);
+    click('[data-body="neutron-star"]');
+    expect(doc.querySelector("#window-note")!.textContent).toMatch(/no magnification/);
+  });
+
+  it("shows Earth's shift in the digits instead of rounding it away", () => {
+    // Earth shifts 500nm by 3.5e-7nm. A fixed decimal count prints a
+    // confident "500 nm" for a number that is not 500.
+    click('[data-body="earth"]');
+    expect(doc.querySelector("#body-nm")!.textContent).toMatch(/^500\.0+[1-9]/);
   });
 
   it("gives a visibly bigger shift for a neutron star than for the Sun", () => {

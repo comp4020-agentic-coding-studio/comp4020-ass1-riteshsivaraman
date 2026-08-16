@@ -98,6 +98,20 @@ for (const viewport of VIEWPORTS) {
     const frames: string[] = [];
     const labels: string[] = [];
 
+    // Scroll the section in so its reveal has fired, then take the controls
+    // away from the self-demo through the same path a reader would — otherwise
+    // the demo keeps animating and the filmstrip documents the demo rather
+    // than the sweep it claims to be showing.
+    await page.locator(strip.section).scrollIntoViewIfNeeded();
+    await page.evaluate((selectors) => {
+      for (const selector of selectors) {
+        document
+          .querySelector(selector)
+          ?.dispatchEvent(new Event("pointerdown", { bubbles: true }));
+      }
+    }, Object.keys(strip.drive(0)));
+    await page.waitForTimeout(700);
+
     for (let i = 0; i < FRAMES; i++) {
       const t = i / (FRAMES - 1);
       await setControls(page, strip.drive(t));
