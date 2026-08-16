@@ -227,6 +227,10 @@ questions and only one of them is a machine's.
 
 ## The defect loop
 
+`DEFECTS.md` is the front door to this: the report template, which sensor
+family owns each kind of defect, and the log of what has been through it. Read
+this section for the procedure; send reports in that format.
+
 Every bug report is **two** bugs: the defect, and the reason the harness let it
 through. Fixing only the first means fixing instances forever. This is the
 procedure, and it is not optional under time pressure — it is *cheapest* under
