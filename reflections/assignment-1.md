@@ -2,7 +2,7 @@
 
 ## What was the breakthrough that moved the work forward?
 
-Realising that a bug report is two bugs, and that I had been reporting one.
+The biggets breakthrough was Realising that a bug report is two bugs, and that I had been reporting one.
 
 Partway through I had a page that passed every check and was completely
 lifeless. My instinct was to list what looked wrong and ask for it to be fixed.
