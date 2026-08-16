@@ -3,22 +3,129 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>COMP4020 prototype</title>
+    <title>How gravity changes light — gravitational redshift</title>
+    <meta
+      name="description"
+      content="An interactive explainer: turn gravity up and watch light stretch out of the visible spectrum."
+    />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <a class="skip" href="#experiment">Skip to the experiment</a>
+
     <header>
-      <nav aria-label="Primary">
-        <a href="./">Home</a>
+      <nav class="site-nav" aria-label="Primary">
+        <span>Gravitational redshift</span>
+        <a href="#experiment">The experiment</a>
       </nav>
     </header>
+
     <main>
-      <h1>COMP4020 prototype</h1>
-      <p data-testid="intro">
-        Replace this with your prototype. This week's brief is on the course website;
-        <code>spec/README.md</code> explains how the checks in this repo relate to it.
-      </p>
+      <!-- 1. Hero -->
+      <section class="section section--space hero" id="top">
+        <div class="section__inner prose">
+          <p class="eyebrow">An interactive explainer</p>
+          <h1>How does gravity change light?</h1>
+          <p class="lede">
+            Placeholder lede. One line setting up the question the page answers.
+          </p>
+        </div>
+        <div class="hero__stage">
+          <p class="lede">[ star + light beam diagram ]</p>
+        </div>
+        <p class="scroll-cue">Scroll</p>
+      </section>
+
+      <!-- 2. Prediction -->
+      <section class="section section--space" id="predict">
+        <div class="section__inner prose">
+          <p class="eyebrow">First, a guess</p>
+          <h2>What happens to light escaping a strong gravitational field?</h2>
+          <p class="lede">Placeholder framing line. No wrong answers.</p>
+        </div>
+        <div class="section__inner">
+          <fieldset class="options">
+            <legend class="visually-hidden">Your prediction</legend>
+            <button class="option" type="button">Placeholder option A</button>
+            <button class="option" type="button">Placeholder option B</button>
+            <button class="option" type="button">Placeholder option C</button>
+            <button class="option" type="button">Placeholder option D</button>
+          </fieldset>
+        </div>
+      </section>
+
+      <!-- 3. The experiment — the core interaction -->
+      <section class="section section--space" id="experiment">
+        <div class="section__inner prose">
+          <p class="eyebrow">The experiment</p>
+          <h2>Turn gravity up</h2>
+          <p class="lede">Placeholder instruction line for the slider.</p>
+        </div>
+        <div class="section__inner experiment">
+          <div class="experiment__stage">
+            <p class="lede">[ emitted vs. observed wave diagram ]</p>
+          </div>
+          <div class="experiment__panel">
+            <div class="control">
+              <label class="control__label" for="compactness">
+                Gravity (compactness)
+              </label>
+              <input
+                id="compactness"
+                type="range"
+                min="0"
+                max="0.95"
+                step="0.01"
+                value="0"
+              />
+            </div>
+
+            <div class="spectrum">
+              <div class="spectrum__bar"></div>
+              <div class="spectrum__scale">
+                <span>380nm</span>
+                <span>780nm</span>
+              </div>
+            </div>
+
+            <div class="readout">
+              <div class="readout__cell">
+                <p class="readout__label">Observed wavelength</p>
+                <p class="readout__value">500nm</p>
+              </div>
+              <div class="readout__cell">
+                <p class="readout__label">Redshift z</p>
+                <p class="readout__value">0.00</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Explanation -->
+      <section class="section section--paper" id="why">
+        <div class="section__inner prose">
+          <p class="eyebrow">What just happened</p>
+          <h2>Climbing out of a gravity well costs light energy</h2>
+          <p>Placeholder explanation paragraph one.</p>
+          <p>Placeholder explanation paragraph two.</p>
+        </div>
+      </section>
+
+      <!-- 5. Why it matters -->
+      <section class="section section--paper" id="matters">
+        <div class="section__inner prose">
+          <p class="eyebrow">Why it matters</p>
+          <h2>We read gravity by reading colour</h2>
+          <p>Placeholder real-world tie-in paragraph.</p>
+        </div>
+      </section>
     </main>
+
+    <footer class="site-footer">
+      <p>Built for COMP4020.</p>
+    </footer>
+
     <script type="module" src="./main.ts"></script>
   </body>
 </html>

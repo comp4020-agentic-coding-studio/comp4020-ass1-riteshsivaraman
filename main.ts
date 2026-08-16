@@ -1,8 +1,7 @@
-// Your prototype's TypeScript goes here. This file exists so the lint
-// sensor has something to check from day one. If the week's spec rules out
-// JavaScript, delete this file and the script tag in index.html — the site
-// you ship has to meet the spec, not the template's defaults.
-const intro = document.querySelector<HTMLElement>('[data-testid="intro"]');
-if (intro) {
-  intro.dataset.ready = "true";
-}
+// DOM wiring only. The physics lives in redshift.ts and the colour in
+// spectrum.ts, both DOM-free and unit-tested, so this file stays a
+// translation layer between an input event and some attributes.
+//
+// Layer 4 fills this in. The page is deliberately readable and correct
+// without it.
+export {};

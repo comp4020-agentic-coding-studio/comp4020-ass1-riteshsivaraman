@@ -1,16 +1,384 @@
+/* ---------------------------------------------------------------------------
+   Layer 1 — design tokens.
+
+   Decided once, here, rather than re-decided per section. Two worlds: the
+   dark side is out where the star is, the light side is where the reading
+   happens. Spectrum colours belong to the spectrum bar and the star's glow
+   only — they are this page's data, so nothing decorative borrows them.
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* Space side */
+  --space: #070b18;
+  --space-raised: #0e1428;
+  --space-line: #1e2745;
+  --on-space: #e8ecf7;
+  --on-space-dim: #97a3c2;
+
+  /* Reading side */
+  --paper: #f7f4ee;
+  --paper-raised: #efeae1;
+  --paper-line: #ddd5c8;
+  --on-paper: #22242a;
+  --on-paper-dim: #5b606c;
+
+  /* One accent, used sparingly and never near the spectrum bar. It needs two
+     values: the bright one reads well on the space background but fails
+     contrast on paper, which the axe scan caught the first time it ran. */
+  --accent: #e2703a;
+  --accent-on-paper: #8f3f13;
+  --accent-soft: rgb(226 112 58 / 15%);
+
+  /* Fluid type scale: 390px → 1920px */
+  --step-sm: clamp(0.83rem, 0.79rem + 0.18vw, 0.94rem);
+  --step-0: clamp(1rem, 0.95rem + 0.25vw, 1.15rem);
+  --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.6rem);
+  --step-2: clamp(1.5rem, 1.3rem + 1vw, 2.3rem);
+  --step-3: clamp(1.9rem, 1.5rem + 2vw, 3.4rem);
+  --step-4: clamp(2.4rem, 1.7rem + 3.4vw, 5rem);
+
+  /* Spacing scale */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-s: 1rem;
+  --space-m: 1.5rem;
+  --space-l: 2.5rem;
+  --space-xl: 4rem;
+  --space-2xl: 6rem;
+  --space-3xl: clamp(4rem, 2rem + 8vw, 9rem);
+
+  --measure: 34rem;
+  --wide: 72rem;
+  --radius: 0.75rem;
+
+  --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", roboto,
+    helvetica, arial, sans-serif;
+  --font-mono: ui-monospace, sfmono-regular, "SF Mono", menlo, consolas,
+    monospace;
+}
+
+/* ---------------------------------------------------------------------------
+   Layer 2 — structure.
+   --------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  padding: 2rem;
-  font-family: system-ui, sans-serif;
+  background: var(--space);
+  color: var(--on-space);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
   line-height: 1.6;
-  color: #1a1a1a;
+  -webkit-font-smoothing: antialiased;
 }
 
-main {
-  max-width: 40rem;
-  margin: 0 auto;
+h1,
+h2,
+h3 {
+  line-height: 1.1;
+  text-wrap: balance;
+  margin: 0;
 }
 
-a {
-  color: #0b5fff;
+h1 {
+  font-size: var(--step-4);
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: var(--step-3);
+  letter-spacing: -0.015em;
+}
+
+h3 {
+  font-size: var(--step-1);
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+:where(a) {
+  color: inherit;
+}
+
+:where(:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--space-3xs);
+}
+
+/* Present to a screen reader, absent to the eye. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link — visible only once focused. */
+.skip {
+  position: absolute;
+  left: var(--space-s);
+  top: var(--space-s);
+  z-index: 10;
+  padding: var(--space-2xs) var(--space-s);
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius);
+  transform: translateY(-200%);
+}
+
+.skip:focus {
+  transform: none;
+}
+
+.site-nav {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-s);
+  padding: var(--space-s) var(--space-m);
+  font-size: var(--step-sm);
+  color: var(--on-space-dim);
+}
+
+.site-nav a {
+  text-decoration: none;
+}
+
+.site-nav a:hover {
+  color: var(--on-space);
+}
+
+/* Sections alternate between the two worlds. */
+.section {
+  padding: var(--space-3xl) var(--space-m);
+}
+
+.section--space {
+  background: var(--space);
+  color: var(--on-space);
+}
+
+.section--paper {
+  background: var(--paper);
+  color: var(--on-paper);
+}
+
+.section__inner {
+  max-width: var(--wide);
+  margin-inline: auto;
+}
+
+.prose {
+  max-width: var(--measure);
+  display: grid;
+  gap: var(--space-m);
+}
+
+.eyebrow {
+  font-size: var(--step-sm);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.lede {
+  font-size: var(--step-1);
+  color: var(--on-space-dim);
+}
+
+.section--paper .lede {
+  color: var(--on-paper-dim);
+}
+
+.section--paper .eyebrow {
+  color: var(--accent-on-paper);
+}
+
+/* --- Hero ---------------------------------------------------------------- */
+
+.hero {
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  gap: var(--space-l);
+  position: relative;
+}
+
+.hero__stage {
+  display: grid;
+  place-items: center;
+  min-height: 30svh;
+}
+
+.scroll-cue {
+  position: absolute;
+  bottom: var(--space-l);
+  left: 50%;
+  translate: -50% 0;
+  font-size: var(--step-sm);
+  color: var(--on-space-dim);
+}
+
+/* --- Experiment: the core interaction ------------------------------------ */
+
+.experiment {
+  display: grid;
+  gap: var(--space-l);
+  margin-top: var(--space-l);
+}
+
+.experiment__stage {
+  background: var(--space-raised);
+  border: 1px solid var(--space-line);
+  border-radius: var(--radius);
+  padding: var(--space-m);
+  min-height: 16rem;
+  display: grid;
+  place-items: center;
+}
+
+.experiment__panel {
+  display: grid;
+  gap: var(--space-m);
+  align-content: start;
+}
+
+.readout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--space-s);
+}
+
+.readout__cell {
+  background: var(--space-raised);
+  border: 1px solid var(--space-line);
+  border-radius: var(--radius);
+  padding: var(--space-s);
+}
+
+.readout__label {
+  font-size: var(--step-sm);
+  color: var(--on-space-dim);
+}
+
+.readout__value {
+  font-family: var(--font-mono);
+  font-size: var(--step-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.spectrum {
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.spectrum__bar {
+  height: 2.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--space-line);
+}
+
+.spectrum__scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--step-sm);
+  color: var(--on-space-dim);
+  font-family: var(--font-mono);
+}
+
+.control {
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.control__label {
+  font-weight: 600;
+}
+
+/* Wide screens: diagram and controls side by side. Phone keeps them stacked,
+   diagram first, so the thing you are changing is above the control. */
+@media (width >= 60rem) {
+  .experiment {
+    grid-template-columns: 1.15fr 1fr;
+    align-items: start;
+  }
+}
+
+/* --- Prediction ---------------------------------------------------------- */
+
+.options {
+  display: grid;
+  gap: var(--space-s);
+  padding: 0;
+  margin: 0;
+  border: 0;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.option {
+  background: var(--space-raised);
+  border: 1px solid var(--space-line);
+  border-radius: var(--radius);
+  padding: var(--space-s) var(--space-m);
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.option:hover {
+  border-color: var(--accent);
+}
+
+.button {
+  justify-self: start;
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: var(--radius);
+  padding: var(--space-xs) var(--space-m);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+/* --- Footer -------------------------------------------------------------- */
+
+.site-footer {
+  background: var(--space);
+  color: var(--on-space-dim);
+  padding: var(--space-l) var(--space-m);
+  font-size: var(--step-sm);
+  text-align: center;
+  border-top: 1px solid var(--space-line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
