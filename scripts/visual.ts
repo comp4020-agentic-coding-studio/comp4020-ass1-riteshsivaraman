@@ -64,6 +64,24 @@ for (const viewport of VIEWPORTS) {
     fullPage: true,
   });
 
+  // The page at rest is the one state a full-page screenshot always catches
+  // and the least interesting one — the slider sits at zero, so both waves
+  // match and nothing has shifted. Drive it and photograph the state the
+  // reader is actually here for.
+  await page.evaluate(() => {
+    const slider = document.querySelector("#compactness") as HTMLInputElement;
+    slider.value = "0.82";
+    slider.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  // The spectrum marker eases to its new position. Without this wait the
+  // screenshot catches it mid-transition and reports a marker position that
+  // the page never actually settles on — the first driven screenshot showed
+  // 82% for a value that pins to 100%.
+  await page.waitForTimeout(400);
+  await page.locator("#experiment").screenshot({
+    path: join(OUT, `experiment-driven-${viewport.name}.png`),
+  });
+
   await page.addScriptTag({ content: axe });
   const results = await page.evaluate(async () => {
     // @ts-expect-error injected above, so it is not in the page's types
